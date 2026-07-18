@@ -90,4 +90,4 @@ A partir daí, peça páginas, visuais, medidas DAX e temas em linguagem natural
 
 As skills são derivadas de [microsoft/skills-for-fabric](https://github.com/microsoft/skills-for-fabric), sob licença MIT (veja [LICENSE](LICENSE)).
 
-Apresentação e adaptação: **Luiz Soutes** — [github.com/soutes](https://github.com/soutes) · [linkedin.com/in/soutes](https://linkedin.com/in/soutes)
+Apresentação e adaptação: **Luiz Augusto Soutes** — [github.com/soutes](https://github.com/soutes) · [linkedin.com/in/soutes](https://linkedin.com/in/soutes)
