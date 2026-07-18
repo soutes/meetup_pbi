@@ -20,6 +20,7 @@ As **skills** entram como a camada de conhecimento: playbooks que ensinam à IA 
 |---|---|
 | [`apresentacao.html`](https://soutes.github.io/meetup_pbi/apresentacao.html) | Slides da aula, direto no navegador — navegue com `←` `→` ou clique; `F` para tela cheia |
 | [`skills/`](skills/) | As 5 skills prontas para instalar no Claude Code / OpenClaude |
+| [`codes.md`](codes.md) | Todos os comandos e prompts da aula, prontos para copiar e colar |
 
 ## As 5 skills
 
