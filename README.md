@@ -2,6 +2,8 @@
 
 Material do meetup **"Do prompt ao dashboard: um novo fluxo de trabalho com IA e Power BI"** — apresentação da aula + as 5 skills de Power BI / Fabric usadas na demonstração ao vivo.
 
+**▶ Apresentação online: [soutes.github.io/meetup_pbi/apresentacao.html](https://soutes.github.io/meetup_pbi/apresentacao.html)**
+
 ## Do que se trata
 
 Uma sessão prática sobre uso de IA generativa no desenvolvimento de dashboards em Power BI. A demonstração constrói um dashboard completo — da definição dos visuais à criação das medidas DAX — usando IA de baixo custo via terminal, integrada ao Power BI Desktop por três peças:
@@ -16,7 +18,7 @@ As **skills** entram como a camada de conhecimento: playbooks que ensinam à IA 
 
 | Item | O que é |
 |---|---|
-| [`apresentacao.html`](apresentacao.html) | Slides da aula. Baixe e abra no navegador — navegue com `←` `→` ou clique; `F` para tela cheia |
+| [`apresentacao.html`](https://soutes.github.io/meetup_pbi/apresentacao.html) | Slides da aula, direto no navegador — navegue com `←` `→` ou clique; `F` para tela cheia |
 | [`skills/`](skills/) | As 5 skills prontas para instalar no Claude Code / OpenClaude |
 
 ## As 5 skills
