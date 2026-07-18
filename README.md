@@ -1,6 +1,8 @@
+![Do prompt ao dashboard — IA e Power BI](assets/banner.svg)
+
 # meetup_pbi
 
-Material do meetup **"Do prompt ao dashboard: um novo fluxo de trabalho com IA e Power BI"** — apresentação da aula + as 5 skills de Power BI / Fabric usadas na demonstração ao vivo.
+Conteúdo do **41º Meetup Power BI** — *"Do prompt ao dashboard: um novo fluxo de trabalho com IA e Power BI"*. Apresentação da aula + as 5 skills de Power BI / Fabric usadas na demonstração ao vivo.
 
 **▶ Apresentação online: [soutes.github.io/meetup_pbi/apresentacao.html](https://soutes.github.io/meetup_pbi/apresentacao.html)**
 
