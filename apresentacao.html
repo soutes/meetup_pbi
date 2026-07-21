@@ -219,7 +219,8 @@
   .promptcols .promptbox { margin-top: 0; }
   .promptcols .promptbox:nth-child(2)::before { content: "prompt · fase 2"; }
   .promptcols .promptbox:nth-child(1)::before { content: "prompt · fase 1"; }
-  .promptfull { padding: clamp(14px, 2vh, 24px) clamp(14px, 1.4vw, 22px); overflow: hidden; }
+  /* sem overflow:hidden aqui — cortaria o rótulo ::before, que fica em top:-11px */
+  .promptfull { padding: clamp(14px, 2vh, 24px) clamp(14px, 1.4vw, 22px); }
   .promptfull pre {
     font-family: var(--mono); font-size: clamp(7px, 0.72vw, 10.5px); line-height: 1.4;
     white-space: pre-wrap; word-break: break-word; margin: 0; color: var(--text);
