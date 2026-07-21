@@ -103,38 +103,105 @@ fato/dimensão, cardinalidade, medidas existentes.
 
 ---
 
-## Prompt 2 — Time em ação (KPI + série temporal)
+## Prompt 2 — Medidas + visuais
+
+Continuação direta do Prompt 1: o modelo **já está conectado** e o schema **já
+foi exibido**. Este prompt não repete nenhum dos dois.
+
+Versão completa também em [`prompts/slide17.md`](prompts/slide17.md).
 
 ```text
-Monte um time de 6 passos pra entregar só um KPI em HTML Content + um
-visual de linha (série temporal), a partir do modelo já conectado:
+Você é especialista Power BI. Continuação direta do prompt anterior: já está
+conectado ao modelo e o schema já foi exibido. NÃO liste conexões, NÃO rode
+INFO.COLUMNS/INFO.TABLES, NÃO mostre tabela de schema de novo. Se precisar de
+um nome de coluna, use o que já está no contexto.
 
-1 — Lead, via powerbi-modeling-mcp direto (sem subagent, sem skill):
-recomenda o indicador mais relevante pra evolução no tempo.
+Execute até o fim, sem pedir confirmação. Pare só se faltar informação
+estrutural.
 
-2 — Lead, via skill /powerbi-report-design: define o contrato visual —
-paleta Binance (preto + dourado #F0B90B) pro card e pro gráfico de linha,
-e o card HTML com flip 3D no hover: verso exibe uma dica de leitura do
-indicador.
+SKILLS OBRIGATÓRIAS
+- Medidas / modelo → skill /semantic-model-authoring
+- Visuais / relatório → skill /powerbi-report-authoring
+Invoque a skill ANTES de agir na fase. Não improvise chamadas MCP fora do que
+a skill manda.
 
-3 — Agente Power BI Visualization Expert Mode: revisa o contrato antes de
-qualquer código — contraste, alinhamento, formatação do eixo de tempo.
-Revisar aqui evita retrabalho: depois que o DAX nasce, mudança de contrato
-custa caro.
+REGRA DE FERRAMENTA
+Permitido: connection_operations, measure_operations, dax_query_operations,
+database_operations.
+PROIBIDO: table_operations, column_operations (quebram nesse modelo).
+Modelo (TMDL) e relatório (PBIR) são arquivos diferentes:
+- Medida salva com database_operations → ExportToTmdlFolder
+- Visual salva com a CLI powerbi-report-author
+- Nunca use ExportToTmdlFolder para salvar visual.
 
-4 — Agente Power BI DAX Expert Mode, via powerbi-modeling-mcp
-(measure_operations + dax_query_operations): cria a medida base do
-indicador e a medida HTML do KPI — DAX do valor + DAX do html/css com o
-flip no hover e a dica do verso gerada a partir do próprio valor
-(ex.: SWITCH por faixa), seguindo o contrato revisado no passo 3.
+FASE 1 — MEDIDAS (skill /semantic-model-authoring)
+6 medidas a partir do schema já conhecido: 4 KPIs + 1 para barras + 1 para
+série temporal. Justifique cada uma em 1 linha.
+formatString conforme a natureza (não use um formato único):
+  moeda → "R$ #,##0.00"   contagem → "#,##0"   ratio → "0.0%"
+Para CADA medida, uma por vez:
+  A) measure_operations → Create
+     { tableName, name, expression, description, formatString }
+  B) dax_query_operations → Validate com EVALUATE ROW("t",[<medida>])
+     Erro → mostre o texto exato, corrija, revalide. Não avance com erro.
+  C) database_operations → ExportToTmdlFolder
+  D) Reporte: "Medida criada e salva. i/6."
+DAX: SUM/AVERAGE/COUNT conforme o tipo. Nunca hardcode datas. Comparação
+temporal: SAMEPERIODLASTYEAR. Ranking: TOPN + ALL.
+Fim da fase: measure_operations → List confirmando as 6.
 
-5 — Lead, via skill /powerbi-report-authoring: cria os dois visuais na
-página ativa e conecta neles as medidas do passo 4.
+FASE 2 — VISUAIS (skill /powerbi-report-authoring)
+Alvo: primeira página do relatório na pasta PBIP. Sem página → crie.
+2+ relatórios → liste e use o primeiro, informando qual.
+6 visuais nativos, UM POR VEZ. Após cada um: salve via CLI, valide o PBIR,
+reporte "Visual criado e validado. n/6."
+  1-4. Card nativo (cardVisual), um por KPI. 230x160px, lado a lado no topo.
+  5. clusteredBarChart. Eixo: coluna de categoria (Top 10). Valor: medida de
+     barras. Abaixo dos cards, à esquerda, 50% da largura x 300px.
+  6. lineChart. Eixo X: coluna de data (formato "MMM YYYY"). Valor: medida
+     temporal. À direita, 50% x 300px.
 
-6 — QA: Agente Power BI Visualization Expert Mode, agora conferindo o
-resultado: valida o PBIR, recarrega o Desktop, tira screenshot e bate o
-que renderizou contra o contrato — cor, contraste, eixo de tempo, card.
-Divergiu? Volta pro passo 5. Nada é dado como pronto sem evidência visual.
+REGRAS DE FORMATAÇÃO PBIR — obrigatórias
+1. visualContainerObjects fica DENTRO de "visual", irmão de "objects".
+   Nunca na raiz do visual.json.
+2. Só use propriedades que existem. NÃO invente. Nomes corretos:
+     categoryAxis.fontColor  → categoryAxis.labelColor
+     valueAxis.fontColor     → valueAxis.labelColor
+     categoryAxis.lineColor  → categoryAxis.gridlineColor
+     valueAxis.lineColor     → valueAxis.gridlineColor
+     labels.fontColor        → labels.color
+3. NÃO existem e não devem ser escritas: general.showTitle,
+   padding.top/right/bottom/left (cardVisual), markers.show/size/shape
+   (lineChart), border.transparency (VCO), categoryAxis.gridline,
+   valueAxis.gridline, stylePreset dentro de objects.
+   Título de visual: use visualContainerObjects.title.
+4. Antes de escrever qualquer bloco de formatação novo, consulte a referência
+   de propriedades da skill /powerbi-report-authoring. Se a propriedade não
+   estiver documentada lá, não escreva.
+5. Valide depois de CADA visual:
+     powerbi-report-author validate <caminho>.Report --format text --no-schema
+   --no-schema evita o warning PBIR_SCHEMA_UNREACHABLE (schema remoto
+   offline). Qualquer erro → mostre o texto exato, corrija, revalide. Só
+   então passe para o próximo visual.
+
+TEMA
+Aplicar via theme JSON da skill, UMA vez — não visual a visual. No theme JSON
+valem as mesmas regras: sem "effects" em "*", sem categoryLabels/wordWrap em
+cardVisual, sem header/items em advancedSlicerVisual, sem *.gridline.
+  fundo card #000000 | valor #F0B90B | label #B0B0B0
+  borda #F0B90B 40% | barras/linha #F0B90B
+  fundo gráfico #1A1A1A | gridlines #333333 | Segoe UI
+
+FINAL
+database_operations → ExportToTmdlFolder (estado final do modelo).
+Validação final: powerbi-report-author validate <caminho>.Report
+--format text --no-schema → deve dar 0 error(s).
+Confirme: "4 KPI cards + barras + série temporal criados e salvos. Abra no
+Power BI Desktop para conferir."
 ```
 
 Regra de ouro do fluxo: `validate → reload → screenshot → só então confirma`.
+
+> As regras de formatação acima não são teoria: sem elas a execução gerou 71
+> erros de validação PBIR — `visualContainerObjects` na raiz, nomes de
+> propriedade inventados e `border.transparency`.
