@@ -211,6 +211,15 @@
   }
   .promptbox .skill { font-family: var(--mono); color: var(--accent); font-weight: 500; }
   .promptbox .var { font-family: var(--mono); color: var(--ok); }
+  /* prompt integral: monoespaçado, rolável, copiável */
+  .promptfull { padding: clamp(14px, 2vh, 24px) clamp(16px, 1.8vw, 28px); overflow: hidden; }
+  .promptfull pre {
+    font-family: var(--mono); font-size: clamp(8.5px, 0.92vw, 13px); line-height: 1.42;
+    white-space: pre-wrap; word-break: break-word; margin: 0; color: var(--text);
+    max-height: 62vh; overflow-y: auto;
+  }
+  .promptfull pre::-webkit-scrollbar { width: 8px; }
+  .promptfull pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
   /* ---------- diagrama de arquitetura ---------- */
   .arch { width: 100%; max-width: 1080px; margin: 0 auto; }
@@ -664,20 +673,109 @@
 
 <!-- ============ 16. AO VIVO — PROMPT 2 ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais</div>
-  <h2>E o visual nasce <span class="accent">validado</span><span class="mono accent" style="animation: blink 1.1s steps(1) infinite;">_</span></h2>
-  <div class="promptbox" style="font-size: clamp(11.5px, 1.25vw, 16.5px); line-height: 1.5;">
-    <strong style="color: var(--text);">Continuação do prompt 1</strong> — já conectado, schema já exibido. Não liste conexões, não rode <span class="mono">INFO.COLUMNS</span>, não repita o schema. Execute até o fim, sem pedir confirmação.<br><br>
-    <strong class="skill">Fase 1 — medidas</strong> (skill <span class="mono">/semantic-model-authoring</span>): 6 medidas — 4 KPIs + 1 de barras + 1 temporal. Uma por vez: <span class="mono">Create</span> → <span class="mono">Validate</span> (<span class="mono">EVALUATE ROW</span>) → <span class="mono">ExportToTmdlFolder</span>. Erro? Mostra o texto exato, corrige, revalida — não avança. <span class="mono">formatString</span> por natureza: moeda, contagem, ratio.<br>
-    <strong class="skill">Fase 2 — visuais</strong> (skill <span class="mono">/powerbi-report-authoring</span>): 4 cards de KPI no topo + <span class="mono">clusteredBarChart</span> (Top 10) + <span class="mono">lineChart</span> (MMM YYYY). Um por vez: cria → salva pela CLI → valida o PBIR.<br>
-    <strong style="color: var(--text);">Regras de formatação PBIR</strong> — <span class="mono">visualContainerObjects</span> dentro de <span class="mono">visual</span>, nunca na raiz. Só propriedades que existem: <span class="mono">labelColor</span> (não <span class="mono">fontColor</span>), <span class="mono">gridlineColor</span> (não <span class="mono">lineColor</span>), <span class="mono">labels.color</span>. Não existem: <span class="mono">general.showTitle</span>, <span class="mono">padding.*</span>, <span class="mono">markers.*</span>, <span class="mono">border.transparency</span>. Não está na referência da skill? Não escreve.<br>
-    <strong style="color: var(--text);">Tema</strong>: theme JSON aplicado uma vez, não visual a visual — preto <span class="mono">#000000</span> + dourado <span class="mono">#F0B90B</span>, gráfico <span class="mono">#1A1A1A</span>, gridlines <span class="mono">#333333</span>.
+  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais · parte 1</div>
+  <h2>O prompt <span class="accent">completo</span><span class="mono accent" style="animation: blink 1.1s steps(1) infinite;">_</span></h2>
+  <div class="promptbox promptfull">
+    <pre>Você é especialista Power BI. Continuação direta do prompt anterior: já está
+conectado ao modelo e o schema já foi exibido. NÃO liste conexões, NÃO rode
+INFO.COLUMNS/INFO.TABLES, NÃO mostre tabela de schema de novo. Se precisar de
+um nome de coluna, use o que já está no contexto.
+
+Execute até o fim, sem pedir confirmação. Pare só se faltar informação
+estrutural.
+
+SKILLS OBRIGATÓRIAS
+- Medidas / modelo → skill /semantic-model-authoring
+- Visuais / relatório → skill /powerbi-report-authoring
+Invoque a skill ANTES de agir na fase. Não improvise chamadas MCP fora do que
+a skill manda.
+
+REGRA DE FERRAMENTA
+Permitido: connection_operations, measure_operations, dax_query_operations,
+database_operations.
+PROIBIDO: table_operations, column_operations (quebram nesse modelo).
+Modelo (TMDL) e relatório (PBIR) são arquivos diferentes:
+- Medida salva com database_operations → ExportToTmdlFolder
+- Visual salva com a CLI powerbi-report-author
+- Nunca use ExportToTmdlFolder para salvar visual.
+
+FASE 1 — MEDIDAS (skill /semantic-model-authoring)
+6 medidas a partir do schema já conhecido: 4 KPIs + 1 para barras + 1 para
+série temporal. Justifique cada uma em 1 linha.
+formatString conforme a natureza (não use um formato único):
+  moeda → "R$ #,##0.00"   contagem → "#,##0"   ratio → "0.0%"
+Para CADA medida, uma por vez:
+  A) measure_operations → Create
+     { tableName, name, expression, description, formatString }
+  B) dax_query_operations → Validate com EVALUATE ROW("t",[&lt;medida&gt;])
+     Erro → mostre o texto exato, corrija, revalide. Não avance com erro.
+  C) database_operations → ExportToTmdlFolder
+  D) Reporte: "Medida criada e salva. i/6."
+DAX: SUM/AVERAGE/COUNT conforme o tipo. Nunca hardcode datas. Comparação
+temporal: SAMEPERIODLASTYEAR. Ranking: TOPN + ALL.
+Fim da fase: measure_operations → List confirmando as 6.</pre>
   </div>
-  <div class="note" style="margin-top: 1.4vh;"><span class="tag">por quê</span><span>Sem essas regras a execução gerou <strong style="color: var(--text);">71 erros</strong> de validação PBIR — propriedade inventada por analogia com PBIX antigo. A regra no prompt custa 5 linhas; o retrabalho custa a demo.</span></div>
-  <div class="flow-line" style="margin-top: 2.4vh;">
+  <div class="note" style="margin-top: 1.2vh;"><span class="tag">continua</span><span>Fase 2, regras de formatação PBIR e tema no próximo slide. Texto integral em <span class="mono">codes.md</span> e <span class="mono">prompts/slide17.md</span> no repositório.</span></div>
+  <style>@keyframes blink { 50% { opacity: 0; } }</style>
+</section>
+
+<!-- ============ 17. AO VIVO — PROMPT 2 (parte 2) ============ -->
+<section class="slide">
+  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais · parte 2</div>
+  <h2>E o visual nasce <span class="accent">validado</span></h2>
+  <div class="promptbox promptfull">
+    <pre>FASE 2 — VISUAIS (skill /powerbi-report-authoring)
+Alvo: primeira página do relatório na pasta PBIP. Sem página → crie.
+2+ relatórios → liste e use o primeiro, informando qual.
+6 visuais nativos, UM POR VEZ. Após cada um: salve via CLI, valide o PBIR,
+reporte "Visual criado e validado. n/6."
+  1-4. Card nativo (cardVisual), um por KPI. 230x160px, lado a lado no topo.
+  5. clusteredBarChart. Eixo: coluna de categoria (Top 10). Valor: medida de
+     barras. Abaixo dos cards, à esquerda, 50% da largura x 300px.
+  6. lineChart. Eixo X: coluna de data (formato "MMM YYYY"). Valor: medida
+     temporal. À direita, 50% x 300px.
+
+REGRAS DE FORMATAÇÃO PBIR — obrigatórias
+1. visualContainerObjects fica DENTRO de "visual", irmão de "objects".
+   Nunca na raiz do visual.json.
+2. Só use propriedades que existem. NÃO invente. Nomes corretos:
+     categoryAxis.fontColor  → categoryAxis.labelColor
+     valueAxis.fontColor     → valueAxis.labelColor
+     categoryAxis.lineColor  → categoryAxis.gridlineColor
+     valueAxis.lineColor     → valueAxis.gridlineColor
+     labels.fontColor        → labels.color
+3. NÃO existem e não devem ser escritas: general.showTitle,
+   padding.top/right/bottom/left (cardVisual), markers.show/size/shape
+   (lineChart), border.transparency (VCO), categoryAxis.gridline,
+   valueAxis.gridline, stylePreset dentro de objects.
+   Título de visual: use visualContainerObjects.title.
+4. Antes de escrever qualquer bloco de formatação novo, consulte a referência
+   de propriedades da skill /powerbi-report-authoring. Se a propriedade não
+   estiver documentada lá, não escreva.
+5. Valide depois de CADA visual:
+     powerbi-report-author validate &lt;caminho&gt;.Report --format text --no-schema
+   Qualquer erro → mostre o texto exato, corrija, revalide. Só então passe
+   para o próximo visual.
+
+TEMA
+Aplicar via theme JSON da skill, UMA vez — não visual a visual. No theme JSON
+valem as mesmas regras: sem "effects" em "*", sem categoryLabels/wordWrap em
+cardVisual, sem header/items em advancedSlicerVisual, sem *.gridline.
+  fundo card #000000 | valor #F0B90B | label #B0B0B0
+  borda #F0B90B 40% | barras/linha #F0B90B
+  fundo gráfico #1A1A1A | gridlines #333333 | Segoe UI
+
+FINAL
+database_operations → ExportToTmdlFolder (estado final do modelo).
+Validação final: powerbi-report-author validate &lt;caminho&gt;.Report
+--format text --no-schema → deve dar 0 error(s).
+Confirme: "4 KPI cards + barras + série temporal criados e salvos. Abra no
+Power BI Desktop para conferir."</pre>
+  </div>
+  <div class="note" style="margin-top: 1.2vh;"><span class="tag">por quê</span><span>Sem as regras de formatação a execução gerou <strong style="color: var(--text);">71 erros</strong> de validação PBIR — propriedade inventada por analogia com PBIX antigo. A regra no prompt custa 5 linhas; o retrabalho custa a demo.</span></div>
+  <div class="flow-line" style="margin-top: 1.6vh;">
     <span class="good">validate</span><span>→</span><span class="good">reload</span><span>→</span><span class="good">screenshot</span><span>→</span><span style="color: var(--text);">só então confirma</span>
   </div>
-  <style>@keyframes blink { 50% { opacity: 0; } }</style>
 </section>
 
 <!-- ============ 17. OBRIGADO ============ -->
@@ -724,7 +822,9 @@
       document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
     }
   });
-  document.addEventListener('click', e => { if (!e.target.closest('.hud')) show(i + 1); });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.hud') && !e.target.closest('.promptfull')) show(i + 1);
+  });
 </script>
 
 
