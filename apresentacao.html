@@ -664,17 +664,16 @@
 
 <!-- ============ 16. AO VIVO — PROMPT 2 ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · prompt 2 de 2 · time em ação</div>
+  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais</div>
   <h2>E o visual nasce <span class="accent">validado</span><span class="mono accent" style="animation: blink 1.1s steps(1) infinite;">_</span></h2>
-  <div class="promptbox" style="font-size: clamp(12.5px, 1.35vw, 18px); line-height: 1.55;">
-    Monte um time de 6 passos pra entregar só um KPI em <span class="mono">HTML Content</span> + um visual de linha (série temporal), a partir do modelo já conectado:<br><br>
-    <strong style="color: var(--text);">1 — Lead, via <span class="mono">powerbi-modeling-mcp</span> direto</strong> (sem subagent, sem skill): recomenda o indicador mais relevante pra evolução no tempo.<br>
-    <strong style="color: var(--text);">2 — Lead, via skill /powerbi-report-design</strong>: define o contrato visual — paleta Binance (preto + dourado <span class="mono">#F0B90B</span>) pro card e pro gráfico de linha, e o card HTML com flip 3D no hover: verso exibe uma dica de leitura do indicador.<br>
-    <strong class="skill">3 — Agente Power BI Visualization Expert Mode</strong>: revisa o contrato antes de qualquer código — contraste, alinhamento, formatação do eixo de tempo. Revisar aqui evita retrabalho: depois que o DAX nasce, mudança de contrato custa caro.<br>
-    <strong class="skill">4 — Agente Power BI DAX Expert Mode</strong>, via <span class="mono">powerbi-modeling-mcp</span> (measure_operations + dax_query_operations): cria a medida base do indicador e a medida HTML do KPI — DAX do valor + DAX do html/css com o flip no hover e a dica do verso gerada a partir do próprio valor (ex.: <span class="mono">SWITCH</span> por faixa), seguindo o contrato revisado no passo 3.<br>
-    <strong style="color: var(--text);">5 — Lead, via skill /powerbi-report-authoring</strong>: cria os dois visuais na página ativa e conecta neles as medidas do passo 4.<br>
-    <strong class="skill">6 — QA: Agente Power BI Visualization Expert Mode</strong>, agora conferindo o resultado: valida o PBIR, recarrega o Desktop, tira screenshot e bate o que renderizou contra o contrato — cor, contraste, eixo de tempo, card. Divergiu? Volta pro passo 5. Nada é dado como pronto sem evidência visual.
+  <div class="promptbox" style="font-size: clamp(11.5px, 1.25vw, 16.5px); line-height: 1.5;">
+    <strong style="color: var(--text);">Continuação do prompt 1</strong> — já conectado, schema já exibido. Não liste conexões, não rode <span class="mono">INFO.COLUMNS</span>, não repita o schema. Execute até o fim, sem pedir confirmação.<br><br>
+    <strong class="skill">Fase 1 — medidas</strong> (skill <span class="mono">/semantic-model-authoring</span>): 6 medidas — 4 KPIs + 1 de barras + 1 temporal. Uma por vez: <span class="mono">Create</span> → <span class="mono">Validate</span> (<span class="mono">EVALUATE ROW</span>) → <span class="mono">ExportToTmdlFolder</span>. Erro? Mostra o texto exato, corrige, revalida — não avança. <span class="mono">formatString</span> por natureza: moeda, contagem, ratio.<br>
+    <strong class="skill">Fase 2 — visuais</strong> (skill <span class="mono">/powerbi-report-authoring</span>): 4 cards de KPI no topo + <span class="mono">clusteredBarChart</span> (Top 10) + <span class="mono">lineChart</span> (MMM YYYY). Um por vez: cria → salva pela CLI → valida o PBIR.<br>
+    <strong style="color: var(--text);">Regras de formatação PBIR</strong> — <span class="mono">visualContainerObjects</span> dentro de <span class="mono">visual</span>, nunca na raiz. Só propriedades que existem: <span class="mono">labelColor</span> (não <span class="mono">fontColor</span>), <span class="mono">gridlineColor</span> (não <span class="mono">lineColor</span>), <span class="mono">labels.color</span>. Não existem: <span class="mono">general.showTitle</span>, <span class="mono">padding.*</span>, <span class="mono">markers.*</span>, <span class="mono">border.transparency</span>. Não está na referência da skill? Não escreve.<br>
+    <strong style="color: var(--text);">Tema</strong>: theme JSON aplicado uma vez, não visual a visual — preto <span class="mono">#000000</span> + dourado <span class="mono">#F0B90B</span>, gráfico <span class="mono">#1A1A1A</span>, gridlines <span class="mono">#333333</span>.
   </div>
+  <div class="note" style="margin-top: 1.4vh;"><span class="tag">por quê</span><span>Sem essas regras a execução gerou <strong style="color: var(--text);">71 erros</strong> de validação PBIR — propriedade inventada por analogia com PBIX antigo. A regra no prompt custa 5 linhas; o retrabalho custa a demo.</span></div>
   <div class="flow-line" style="margin-top: 2.4vh;">
     <span class="good">validate</span><span>→</span><span class="good">reload</span><span>→</span><span class="good">screenshot</span><span>→</span><span style="color: var(--text);">só então confirma</span>
   </div>
