@@ -211,10 +211,17 @@
   }
   .promptbox .skill { font-family: var(--mono); color: var(--accent); font-weight: 500; }
   .promptbox .var { font-family: var(--mono); color: var(--ok); }
-  /* prompt integral: monoespaçado, rolável, copiável */
-  .promptfull { padding: clamp(14px, 2vh, 24px) clamp(16px, 1.8vw, 28px); overflow: hidden; }
+  /* prompt integral: dois blocos lado a lado, monoespaçado, copiável */
+  .promptcols {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: clamp(14px, 1.6vw, 26px); align-items: start; margin-top: 1.4vh;
+  }
+  .promptcols .promptbox { margin-top: 0; }
+  .promptcols .promptbox:nth-child(2)::before { content: "prompt · fase 2"; }
+  .promptcols .promptbox:nth-child(1)::before { content: "prompt · fase 1"; }
+  .promptfull { padding: clamp(14px, 2vh, 24px) clamp(14px, 1.4vw, 22px); overflow: hidden; }
   .promptfull pre {
-    font-family: var(--mono); font-size: clamp(8.5px, 0.92vw, 13px); line-height: 1.42;
+    font-family: var(--mono); font-size: clamp(7px, 0.72vw, 10.5px); line-height: 1.4;
     white-space: pre-wrap; word-break: break-word; margin: 0; color: var(--text);
     max-height: 62vh; overflow-y: auto;
   }
@@ -673,8 +680,9 @@
 
 <!-- ============ 16. AO VIVO — PROMPT 2 ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais · parte 1</div>
+  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais</div>
   <h2>O prompt <span class="accent">completo</span><span class="mono accent" style="animation: blink 1.1s steps(1) infinite;">_</span></h2>
+  <div class="promptcols">
   <div class="promptbox promptfull">
     <pre>Você é especialista Power BI. Continuação direta do prompt anterior: já está
 conectado ao modelo e o schema já foi exibido. NÃO liste conexões, NÃO rode
@@ -715,14 +723,6 @@ DAX: SUM/AVERAGE/COUNT conforme o tipo. Nunca hardcode datas. Comparação
 temporal: SAMEPERIODLASTYEAR. Ranking: TOPN + ALL.
 Fim da fase: measure_operations → List confirmando as 6.</pre>
   </div>
-  <div class="note" style="margin-top: 1.2vh;"><span class="tag">continua</span><span>Fase 2, regras de formatação PBIR e tema no próximo slide. Texto integral em <span class="mono">codes.md</span> e <span class="mono">prompts/slide17.md</span> no repositório.</span></div>
-  <style>@keyframes blink { 50% { opacity: 0; } }</style>
-</section>
-
-<!-- ============ 17. AO VIVO — PROMPT 2 (parte 2) ============ -->
-<section class="slide">
-  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais · parte 2</div>
-  <h2>E o visual nasce <span class="accent">validado</span></h2>
   <div class="promptbox promptfull">
     <pre>FASE 2 — VISUAIS (skill /powerbi-report-authoring)
 Alvo: primeira página do relatório na pasta PBIP. Sem página → crie.
@@ -772,10 +772,12 @@ Validação final: powerbi-report-author validate &lt;caminho&gt;.Report
 Confirme: "4 KPI cards + barras + série temporal criados e salvos. Abra no
 Power BI Desktop para conferir."</pre>
   </div>
-  <div class="note" style="margin-top: 1.2vh;"><span class="tag">por quê</span><span>Sem as regras de formatação a execução gerou <strong style="color: var(--text);">71 erros</strong> de validação PBIR — propriedade inventada por analogia com PBIX antigo. A regra no prompt custa 5 linhas; o retrabalho custa a demo.</span></div>
-  <div class="flow-line" style="margin-top: 1.6vh;">
+  </div>
+  <div class="note" style="margin-top: 1.2vh;"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
+  <div class="flow-line" style="margin-top: 1.4vh;">
     <span class="good">validate</span><span>→</span><span class="good">reload</span><span>→</span><span class="good">screenshot</span><span>→</span><span style="color: var(--text);">só então confirma</span>
   </div>
+  <style>@keyframes blink { 50% { opacity: 0; } }</style>
 </section>
 
 <!-- ============ 17. OBRIGADO ============ -->
