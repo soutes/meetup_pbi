@@ -54,7 +54,7 @@ Load these references on demand when a workflow step requires them. Do not load 
 | Modeling Best Practices          | [modeling-guidelines.md](./references/modeling-guidelines.md)                      | Before creating or editing any model                                                        |
 | Naming Conventions               | [naming-conventions.md](./references/naming-conventions.md)                        | When naming or renaming tables, columns, measures                                           |
 | Direct Lake Modeling             | [direct-lake-guidelines.md](./references/direct-lake-guidelines.md)                | When model connects to OneLake                                                              |
-| TMDL Editing                     | [tmdl-guidelines.md](./references/tmdl-guidelines.md)                              | Before generating or editing any TMDL file                                                  |
+| TMDL Editing                     | [tmdl-guidelines-pt-BR.md](./references/tmdl-guidelines-pt-BR.md)                              | Before generating or editing any TMDL file                                                  |
 | PBIP Projects                    | [pbip.md](./references/pbip.md)                                                    | When working with PBIP folders                                                              |
 | DAX Language                     | [dax-guidelines.md](./references/dax-guidelines.md)                                | When writing or reviewing any DAX code                                                      |
 | DAX Queries & Metadata Discovery | [semantic-model-consumption](../semantic-model-consumption/SKILL.md)                     | Read-only DAX queries; use for post-creation validation                                     |
@@ -85,7 +85,7 @@ Priority order (highest first):
    - To inspect or verify changes -> use the corresponding MCP operations (List / Get).
    - **Anti-pattern:** opening, `view`-ing, `glob`-ing or otherwise reading TMDL files (`*.tmdl`) while MCP is connected. The MCP-loaded model is the source of truth - the on-disk TMDL is stale. The only exceptions is when the user explicitly asks to work with the TMDL files.
 
-2. **Tier 2 — MCP not registered + PBIP folder or Fabric workspace** -> Edit TMDL files directly. Load [tmdl-guidelines.md](./references/tmdl-guidelines.md) and [pbip.md](./references/pbip.md). When the source is a Fabric workspace, use `az rest` to round-trip the TMDL (load [semantic-model-rest-api.md](./references/semantic-model-rest-api.md)): `getDefinition` -> edit TMDL locally -> `updateDefinition`.
+2. **Tier 2 — MCP not registered + PBIP folder or Fabric workspace** -> Edit TMDL files directly. Load [tmdl-guidelines-pt-BR.md](./references/tmdl-guidelines-pt-BR.md) and [pbip.md](./references/pbip.md). When the source is a Fabric workspace, use `az rest` to round-trip the TMDL (load [semantic-model-rest-api.md](./references/semantic-model-rest-api.md)): `getDefinition` -> edit TMDL locally -> `updateDefinition`.
 
 **Fallback — none of the above available (e.g., Power BI Desktop with no PBIP and no MCP)** -> STOP. The agent cannot author the model in this configuration. Instruct the user to either (a) install and register the `powerbi-modeling-mcp` MCP server, or (b) save the PBIX as a PBIP project, then restart the workflow.
 
@@ -141,7 +141,7 @@ Steps:
 Steps:
 
 1. **Connect & discover** - per [Connecting to a Semantic Model](#connecting-to-a-semantic-model). List tables, relationships, existing measures, and identify storage mode (it dictates which guidelines apply).
-2. **Load applicable guidelines** - [modeling-guidelines.md](./references/modeling-guidelines.md) always; [direct-lake-guidelines.md](./references/direct-lake-guidelines.md) if Direct Lake; [tmdl-guidelines.md](./references/tmdl-guidelines.md) when editing TMDL directly; [dax-guidelines.md](./references/dax-guidelines.md) for any DAX changes (includes UDF refactoring).
+2. **Load applicable guidelines** - [modeling-guidelines.md](./references/modeling-guidelines.md) always; [direct-lake-guidelines.md](./references/direct-lake-guidelines.md) if Direct Lake; [tmdl-guidelines-pt-BR.md](./references/tmdl-guidelines-pt-BR.md) when editing TMDL directly; [dax-guidelines.md](./references/dax-guidelines.md) for any DAX changes (includes UDF refactoring).
 3. **Plan changes** - identify exactly what to add, modify, or remove. Check for naming conflicts and duplicates.
 4. **Execute** in correct order:
    - **Adding tables** - partitions -> columns -> relationships -> measures.
@@ -392,7 +392,7 @@ If any check fails, fix the issue and re-run validation.
 | Symptom                              | Fix                                                                                                                   |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
 | MCP connection failure               | Fall back to TMDL editing (see Tool Selection Priority). Inform the user about the fallback.                          |
-| TMDL validation errors               | Read error details, fix syntax, re-validate. Load [tmdl-guidelines.md](./references/tmdl-guidelines.md).              |
+| TMDL validation errors               | Read error details, fix syntax, re-validate. Load [tmdl-guidelines-pt-BR.md](./references/tmdl-guidelines-pt-BR.md).              |
 | `403 Forbidden` / `identity None`    | User needs Contributor+ role - stop immediately. Do not retry.                                                        |
 | `401 Unauthorized`                   | Wrong `--resource` audience or missing permissions to the item. Check [semantic-model-rest-api.md](./references/semantic-model-rest-api.md). |
 | `202 Accepted` but no result         | Poll LRO to completion.                                                                                               |

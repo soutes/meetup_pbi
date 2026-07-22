@@ -91,117 +91,93 @@ Dentro do OpenClaude já aberto:
 
 ---
 
-## Prompt 1 — Conectar e analisar o modelo
+## Prompt 1 — Descoberta e plano
 
 ```text
-Use a skill /semantic-model-authoring pra conectar no arquivo .pbip aberto
-no Power BI Desktop via powerbi-modeling-mcp (TOM ao vivo — não edite TMDL
-na mão, o Desktop está aberto). Liste tabelas, colunas, medidas e
-relacionamentos do modelo. Resuma os principais insights: tabelas
-fato/dimensão, cardinalidade, medidas existentes.
+Você é engenheiro Power BI. Execute até o fim sem pedir confirmação. Existe
+um projeto .pbip nesta pasta, com modelo e dataset desconhecidos — descubra
+tudo agora, não assuma nomes de nenhum outro projeto.
+
+Invoque a skill /semantic-model-authoring, caminho TMDL direto (Tier 2) —
+NUNCA use powerbi-modeling-mcp neste fluxo, mesmo que esteja registrado.
+Power BI Desktop deve estar FECHADO: aberto, ele sobrescreve qualquer
+edição de TMDL feita em disco.
+
+Leia SOMENTE arquivos de definição (*.tmdl, *.json em
+<nome>.SemanticModel/definition/ e <nome>.Report/definition/) — nunca CSV,
+Excel, cache.abf ou qualquer engine de query. Dados de linha não entram no
+contexto da IA.
+
+Liste tabelas, colunas (com tipo), medidas existentes e relacionamentos.
+Resuma tabela(s) fato, dimensões, cardinalidade. Use só nomes lidos dos
+arquivos — não invente.
+
+Proponha exatamente 2 visuais nativos — 1 card KPI e 1 gráfico de barras —
+com as medidas necessárias: name, expression DAX, formatString conforme a
+natureza (moeda "R$ #,##0.00" | contagem "#,##0" | ratio "0.0%"),
+displayFolder. Nomes de medida em ASCII puro, sem acento — o TMDL vai ser
+editado à mão no próximo prompt e acento com encoding errado corrompe o
+arquivo. Se já existir medida equivalente, reuse.
+
+Grave o plano em `_status/plano.md`: schema resumido, tabela e arquivo .tmdl
+alvo, os 2 visuais e as medidas propostas. Mostre o plano e pare — a criação
+vem no próximo prompt.
 ```
 
 ---
 
-## Prompt 2 — Medidas + visuais
+## Prompt 2 — Execução
 
-Continuação direta do Prompt 1: o modelo **já está conectado** e o schema **já
-foi exibido**. Este prompt não repete nenhum dos dois.
-
-Versão completa também em [`prompts/slide17.md`](prompts/slide17.md).
+Continuação: o plano já está em `_status/plano.md`. Power BI Desktop
+continua **FECHADO** durante toda a execução.
 
 ```text
-Você é especialista Power BI. Continuação direta do prompt anterior: já está
-conectado ao modelo e o schema já foi exibido. NÃO liste conexões, NÃO rode
-INFO.COLUMNS/INFO.TABLES, NÃO mostre tabela de schema de novo. Se precisar de
-um nome de coluna, use o que já está no contexto.
+Você é engenheiro Power BI. Execute até o fim sem pedir confirmação. Leia
+_status/plano.md (se não existir, pare e peça pra rodar o prompt 1).
+Confirme que o Desktop está fechado antes de tocar em qualquer .tmdl.
 
-Execute até o fim, sem pedir confirmação. Pare só se faltar informação
-estrutural.
+FASE 1 — MEDIDAS (skill /semantic-model-authoring, TMDL direto)
+Leia tmdl-guidelines-pt-BR.md antes de editar. Liste medidas existentes —
+NÃO crie duplicata (Desktop rejeita: "TMDL objects cannot be merged").
+Insira cada medida do plano ANTES das colunas:
+  /// Descricao da medida (ASCII, sem acento)
+  measure 'Nome' = EXPRESSAO_DAX
+    formatString: <formato>
+    displayFolder: <pasta>
+Siga a indentação exata do arquivo existente.
 
-SKILLS OBRIGATÓRIAS
-- Medidas / modelo → skill /semantic-model-authoring
-- Visuais / relatório → skill /powerbi-report-authoring
-Invoque a skill ANTES de agir na fase. Não improvise chamadas MCP fora do que
-a skill manda.
-
-REGRA DE FERRAMENTA
-Permitido: connection_operations, measure_operations, dax_query_operations,
-database_operations.
-PROIBIDO: table_operations, column_operations (quebram nesse modelo).
-Modelo (TMDL) e relatório (PBIR) são arquivos diferentes:
-- Medida salva com database_operations → ExportToTmdlFolder
-- Visual salva com a CLI powerbi-report-author
-- Nunca use ExportToTmdlFolder para salvar visual.
-
-FASE 1 — MEDIDAS (skill /semantic-model-authoring)
-6 medidas a partir do schema já conhecido: 4 KPIs + 1 para barras + 1 para
-série temporal. Justifique cada uma em 1 linha.
-formatString conforme a natureza (não use um formato único):
-  moeda → "R$ #,##0.00"   contagem → "#,##0"   ratio → "0.0%"
-Para CADA medida, uma por vez:
-  A) measure_operations → Create
-     { tableName, name, expression, description, formatString }
-  B) dax_query_operations → Validate com EVALUATE ROW("t",[<medida>])
-     Erro → mostre o texto exato, corrija, revalide. Não avance com erro.
-  C) database_operations → ExportToTmdlFolder
-  D) Reporte: "Medida criada e salva. i/6."
-DAX: SUM/AVERAGE/COUNT conforme o tipo. Nunca hardcode datas. Comparação
-temporal: SAMEPERIODLASTYEAR. Ranking: TOPN + ALL.
-Fim da fase: measure_operations → List confirmando as 6.
+ENCODING — obrigatório, evita corromper o arquivo
+- NUNCA grave .tmdl via shell (Set-Content/Out-File/echo) — pode gravar em
+  ANSI. Use só a ferramenta de edição de arquivo nativa.
+- Após CADA edição, valide UTF-8 antes de continuar. Não avance sem
+  confirmação de encoding correto.
 
 FASE 2 — VISUAIS (skill /powerbi-report-authoring)
-Alvo: primeira página do relatório na pasta PBIP. Sem página → crie.
-2+ relatórios → liste e use o primeiro, informando qual.
-6 visuais nativos, UM POR VEZ. Após cada um: salve via CLI, valide o PBIR,
-reporte "Visual criado e validado. n/6."
-  1-4. Card nativo (cardVisual), um por KPI. 230x160px, lado a lado no topo.
-  5. clusteredBarChart. Eixo: coluna de categoria (Top 10). Valor: medida de
-     barras. Abaixo dos cards, à esquerda, 50% da largura x 300px.
-  6. lineChart. Eixo X: coluna de data (formato "MMM YYYY"). Valor: medida
-     temporal. À direita, 50% x 300px.
+Alvo: primeira página do relatório (crie se não houver).
+Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline
+zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em
+linguagem natural, nunca nome técnico de coluna.
 
-REGRAS DE FORMATAÇÃO PBIR — obrigatórias
-1. visualContainerObjects fica DENTRO de "visual", irmão de "objects".
-   Nunca na raiz do visual.json.
-2. Só use propriedades que existem. NÃO invente. Nomes corretos:
-     categoryAxis.fontColor  → categoryAxis.labelColor
-     valueAxis.fontColor     → valueAxis.labelColor
-     categoryAxis.lineColor  → categoryAxis.gridlineColor
-     valueAxis.lineColor     → valueAxis.gridlineColor
-     labels.fontColor        → labels.color
-3. NÃO existem e não devem ser escritas: general.showTitle,
-   padding.top/right/bottom/left (cardVisual), markers.show/size/shape
-   (lineChart), border.transparency (VCO), categoryAxis.gridline,
-   valueAxis.gridline, stylePreset dentro de objects.
-   Título de visual: use visualContainerObjects.title.
-4. Antes de escrever qualquer bloco de formatação novo, consulte a referência
-   de propriedades da skill /powerbi-report-authoring. Se a propriedade não
-   estiver documentada lá, não escreva.
-5. Valide depois de CADA visual:
-     powerbi-report-author validate <caminho>.Report --format text --no-schema
-   --no-schema evita o warning PBIR_SCHEMA_UNREACHABLE (schema remoto
-   offline). Qualquer erro → mostre o texto exato, corrija, revalide. Só
-   então passe para o próximo visual.
+Antes de escrever visual.json, leia authoring.md § Erros Comuns e
+formatting.md. Não repita:
+  - field sem wrapper Column/Measure/Aggregation (Desktop não abre o
+    relatório)
+  - objects.* como objeto solto — sempre array [{ "properties": {...} }]
+  - literal sem sufixo D/L ("14pt", "8" cru), cor como string crua
+  - filterConfig dentro de "visual" (mora na raiz, irmão de "visual")
+  - position embrulhado em Literal (usa número direto: "x": 32)
+Gere cada literal com:
+  powerbi-report-author expr encode <valor> --kind <bool|number|integer|string|color>
 
-TEMA
-Aplicar via theme JSON da skill, UMA vez — não visual a visual. No theme JSON
-valem as mesmas regras: sem "effects" em "*", sem categoryLabels/wordWrap em
-cardVisual, sem header/items em advancedSlicerVisual, sem *.gridline.
-  fundo card #000000 | valor #F0B90B | label #B0B0B0
-  borda #F0B90B 40% | barras/linha #F0B90B
-  fundo gráfico #1A1A1A | gridlines #333333 | Segoe UI
-
-FINAL
-database_operations → ExportToTmdlFolder (estado final do modelo).
-Validação final: powerbi-report-author validate <caminho>.Report
---format text --no-schema → deve dar 0 error(s).
-Confirme: "4 KPI cards + barras + série temporal criados e salvos. Abra no
-Power BI Desktop para conferir."
+FECHAMENTO
+powerbi-report-author validate — 0 erros. PBIR_SCHEMA_UNREACHABLE significa
+que a checagem de schema foi PULADA, não é sucesso: aponte $schema
+temporariamente pra última versão publicada, revalide, corrija, restaure.
+Instrua o usuário: "Abra o .pbip no Power BI Desktop pra conferir."
 ```
 
-Regra de ouro do fluxo: `validate → reload → screenshot → só então confirma`.
+Regra de ouro do fluxo: `validate → Desktop fechado até o fim → abrir e conferir`.
 
-> As regras de formatação acima não são teoria: sem elas a execução gerou 71
-> erros de validação PBIR — `visualContainerObjects` na raiz, nomes de
-> propriedade inventados e `border.transparency`.
+> As regras de encoding e de formatação acima não são teoria: escritas
+> errado, elas já corromperam TMDL gravado com acento em ANSI e derrubaram o
+> load do relatório inteiro no Desktop.

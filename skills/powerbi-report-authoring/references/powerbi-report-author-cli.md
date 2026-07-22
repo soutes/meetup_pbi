@@ -36,6 +36,12 @@ batch of PBIR edits.
 - Fix every error before Desktop reload.
 - Review warnings before proceeding. Unknown visual types or theme visual keys
   usually mean a typo unless the report intentionally uses a custom `.pbiviz`.
+- **`PBIR_SCHEMA_UNREACHABLE` = schema validation was skipped** for the listed
+  files (Desktop writes `$schema` versions ahead of the published ones — the
+  fetch 404s). Structural errors pass undetected and crash Desktop's report
+  load. Do not report success: temporarily point `$schema` at the latest
+  published version, re-validate, fix errors, restore the original `$schema`.
+  See SKILL.md § Validation result handling.
 - Diagnostics include file paths and JSON paths. Use them to jump directly to
   the broken node.
 - For large diagnostics, use `--pretty` for readable output or `--out <file>` to

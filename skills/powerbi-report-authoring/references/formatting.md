@@ -87,6 +87,20 @@ Most formatting properties use a `Literal` expression wrapper:
 | `'...'` | String (single-quoted) | `"'Left'"`, `"'Center'"`, `"'Top'"` |
 | `'#...'` | Color hex (single-quoted) | `"'#118DFF'"`, `"'#f6c7b9'"` |
 
+> ⚠️ **Malformed literals are FATAL** — they pass JSON parsing and (when the
+> schema is unreachable) validation, then crash the entire report load in
+> Desktop ("Failed to load the report"). Never write:
+>
+> | Invalid | Why | Correct |
+> |---|---|---|
+> | `"14pt"`, `"12px"` | Units don't exist in PBIR literals | `"14D"` |
+> | `"8"`, `"0"` (bare number) | Missing `D`/`L` suffix | `"8D"`, `"0D"` |
+> | `{"solid": {"color": "#FFFFFF"}}` | Color as raw string (valid only in theme JSON) | `{"solid": {"color": {"expr": {"Literal": {"Value": "'#FFFFFF'"}}}}}` |
+>
+> Generate values with `powerbi-report-author expr encode <value> --kind
+> <bool|number|integer|string|color>`; verify suspicious ones with
+> `expr decode` — a result of `"type": "unknown"` means invalid.
+
 ## Solid Color Fill
 ```json
 {

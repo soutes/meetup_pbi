@@ -18,6 +18,18 @@ Related references:
 > `powerbi-report-author formatting describe-object <type> <object>` before
 > applying formatting.
 
+## File Encoding (CRITICAL)
+
+All PBIR files (`.json`, `.pbir`) **must** be saved with:
+
+| Property | Required value |
+|----------|---------------|
+| Encoding | UTF-8 **without** BOM |
+| Line endings | CRLF (`\r\n`) |
+
+Writing with a BOM or LF-only line endings causes Desktop errors.
+See [pbip.md § File Encoding](../../../semantic-model-authoring/references/pbip.md#file-encoding-critical) for Python examples and verification code.
+
 ## Contents
 
 - [Names & Format Versions](#names--format-versions)
@@ -119,6 +131,133 @@ type in the same report.
 - `z`: Stacking order. Higher = on top. Increment by 1000 for each visual.
 - `tabOrder`: Keyboard navigation order. Usually matches `z`.
 - Keep visuals within canvas bounds: `x + width ≤ 1280`, `y + height ≤ 720`.
+
+### Erros Comuns ao Criar Visuais PBIR (CRITICO)
+
+**Erro 1 — Arquivo na pasta errada:**
+Desktop e CLI não descobrem visuais se o JSON estiver na raiz da pasta da página.
+
+❌ ERRADO:
+```
+pages/<pageId>/
+├── page.json
+├── visual_1.json      ← NÃO FUNCIONA
+└── visual_2.json      ← NÃO FUNCIONA
+```
+
+✅ CORRETO:
+```
+pages/<pageId>/
+├── page.json
+└── visuals/
+    ├── <hex-id-1>/
+    │   └── visual.json   ← CADA visual na SUA subpasta
+    └── <hex-id-2>/
+        └── visual.json
+```
+
+**Erro 2 — Tipo de visual errado para Card:**
+
+❌ ERRADO: `"visualType": "card"` (legado, depreciado)
+✅ CORRETO: `"visualType": "cardVisual"`
+
+**Erro 3 — Role errada para Card:**
+
+❌ ERRADO: `"queryState": { "Values": [...] }`
+✅ CORRETO: `"queryState": { "Data": { "projections": [...] } }`
+
+**Erro 4 — Campo errado para medida em Card:**
+
+❌ ERRADO: `"field": { "Aggregation": { ... } }`
+✅ CORRETO: `"field": { "Measure": { "Expression": { "SourceRef": { "Entity": "<Table>" } }, "Property": "<Measure>" } }`
+
+**Erro 5 — Cor sem wrapper `solid`:**
+
+❌ ERRADO: `"color": { "expr": { "Literal": { "Value": "'#1E1E2E'" } } }`
+✅ CORRETO: `"color": { "solid": { "color": { "expr": { "Literal": { "Value": "'#1E1E2E'" } } } } }`
+
+**Erro 6 — `nativeQueryRef` errado para agregação:**
+
+❌ ERRADO: `"nativeQueryRef": "AI_Replacement_Risk"`
+✅ CORRETO: `"nativeQueryRef": "Average of AI_Replacement_Risk"` (prefixo com nome da função)
+
+**Erro 7 — `field` sem wrapper (FATAL — Desktop não abre o relatório):**
+O primeiro nível dentro de `field` DEVE ser um wrapper de expressão
+(`Column`, `Measure`, `Aggregation`, `HierarchyLevel`). `Expression`/`Property`
+soltos direto no `field` passam no JSON parse mas derrubam o load inteiro.
+
+❌ ERRADO:
+```json
+"field": { "Expression": { "SourceRef": { "Entity": "T" } }, "Property": "Col" }
+```
+✅ CORRETO:
+```json
+"field": { "Column": { "Expression": { "SourceRef": { "Entity": "T" } }, "Property": "Col" } }
+```
+Dentro de `queryState`, o `SourceRef` usa `"Entity"` (nome da tabela) —
+`"Source"` só existe em expressões com alias (ex.: `In` de filtros).
+
+**Erro 8 — Literais malformados (FATAL — Desktop não abre o relatório):**
+Unidades e números sem sufixo não existem no formato de literal PBIR.
+
+❌ ERRADO: `"Value": "14pt"` | `"Value": "8"` | `"Value": "0"` | cor crua `{"solid":{"color":"#FFFFFF"}}`
+✅ CORRETO: `"Value": "14D"` | `"Value": "8D"` | `"Value": "0D"` | `{"solid":{"color":{"expr":{"Literal":{"Value":"'#FFFFFF'"}}}}}`
+
+Gere com `powerbi-report-author expr encode <valor> --kind <tipo>`; confira
+com `expr decode` (resultado `"type": "unknown"` = inválido).
+
+**Erro 9 — Filtros dentro de `visual`:**
+`filterConfig` fica na RAIZ do visual.json (irmão de `visual` e `position`),
+nunca dentro de `visual`.
+
+**Erro 10 — `position` com expressão Literal:**
+`position` usa números diretos (`"x": 32`), nunca
+`{"expr":{"Literal":{"Value":"32L"}}}`. Frações são aceitas.
+
+**Erro 11 — `objects.*` sem wrapper de array (FATAL — Desktop rejeita: "A
+propriedade /visual/objects/<nome> não foi fornecida como o tipo correto"):**
+Cada objeto de formatação (`categoryAxis`, `valueAxis`, `labels`,
+`categoryLabels`, `dataPoint`, etc.) DEVE ser um **array** contendo
+`{ "properties": {...} }` — nunca as propriedades soltas direto no objeto.
+Mesma regra vale para `visualContainerObjects.*`. Ver detalhes e mais
+exemplos em [formatting.md § Formatting JSON Structure](formatting.md#formatting-json-structure).
+
+❌ ERRADO:
+```json
+"objects": {
+  "categoryAxis": {
+    "show": { "expr": { "Literal": { "Value": "true" } } }
+  }
+}
+```
+✅ CORRETO:
+```json
+"objects": {
+  "categoryAxis": [
+    {
+      "properties": {
+        "show": { "expr": { "Literal": { "Value": "true" } } }
+      }
+    }
+  ]
+}
+```
+
+**Verificação obrigatória:**
+```bash
+# Listar visuais descobertos (deve mostrar todos):
+powerbi-report-author preview-visuals <caminho-.Report>
+
+# Validar (0 erros):
+powerbi-report-author validate <caminho-.pbip-ou-.Report>
+```
+
+⚠️ Se o validate reportar `PBIR_SCHEMA_UNREACHABLE`, a checagem de schema foi
+**pulada** (o Desktop grava versões de `$schema` antes da Microsoft publicar —
+ex.: `visualContainer/2.10.0` gravado, só `2.9.0` publicado). Não declare
+sucesso: aponte temporariamente o `$schema` pra última versão publicada,
+revalide, corrija os erros estruturais e restaure o `$schema` original.
+Ver SKILL.md § Validation result handling.
 
 ## Common Layout Templates
 

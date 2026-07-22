@@ -437,7 +437,7 @@ Each entry returned by `GET .../datasources` contains:
 | `datasourceId`      | Data source unique identifier                           |
 | `gatewayId`         | Associated gateway (if on-premises)                     |
 
-For Direct Lake models, the M expression in the TMDL definition reveals the source Lakehouse/Warehouse connection path. See [tmdl-guidelines.md](./tmdl-guidelines.md).
+For Direct Lake models, the M expression in the TMDL definition reveals the source Lakehouse/Warehouse connection path. See [tmdl-guidelines-pt-BR.md](./tmdl-guidelines-pt-BR.md).
 
 ### DirectQuery / LiveConnection Refresh Schedule Properties
 

@@ -206,6 +206,14 @@ time of writing — newer values may appear in any user's PBIP). When editing,
 the `$schema` URL from an existing file of the same type in the same report.
 Do not invent or bump versions on your own. Validate with `powerbi-report-author validate`.
 
+> ⚠️ Desktop often writes `$schema` versions **before** Microsoft publishes
+> them online (e.g. `visualContainer/2.10.0` written by Desktop while only
+> `2.9.0` resolves at the URL). The version is still correct — keep it — but
+> `validate` cannot fetch it and silently skips schema checks, reporting
+> `PBIR_SCHEMA_UNREACHABLE`. See
+> [Validation result handling](#validation-result-handling) for the mandatory
+> compensating procedure.
+
 ---
 
 ## Authoring Metadata & Validation CLI
@@ -240,6 +248,22 @@ batch of PBIR edits.
 - `succeededWithWarnings`: review warnings before proceeding. Unknown visual
   types or theme visual keys usually mean a typo unless the report intentionally
   uses a custom `.pbiviz`.
+- **`PBIR_SCHEMA_UNREACHABLE` is NOT an ignorable warning.** It means JSON
+  Schema validation was **silently skipped** for the listed files — structural
+  errors (wrong `field` nesting, malformed literals, misplaced keys) pass
+  undetected and surface later as Desktop's generic "Failed to load the report".
+  Root cause: Desktop writes `$schema` versions ahead of what Microsoft has
+  published online (e.g. Desktop writes `visualContainer/2.10.0` while only
+  `2.9.0` is published → the fetch 404s). Compensating procedure, mandatory
+  before reporting success:
+  1. Temporarily rewrite the affected files' `$schema` to the **latest
+     published** version of the same contract (probe with an HTTP HEAD, or step
+     down one minor version, e.g. `2.10.0` → `2.9.0`).
+  2. Re-run `validate` — now schema checks actually run. Fix every error.
+  3. Restore the original `$schema` value (the Desktop-written version is the
+     correct one to keep on disk).
+  Quick alternative for literal-only checks: `expr decode` each
+  `Literal.Value` — any result with `"type": "unknown"` is invalid.
 - Diagnostics include file paths and JSON paths. Use them to jump directly to
   the broken node.
 - For large diagnostics, use `--pretty` for readable output or `--out <file>` to
