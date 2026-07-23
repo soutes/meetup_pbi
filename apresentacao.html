@@ -672,7 +672,7 @@
 <!-- ============ 14. ABERTURA AO VIVO ============ -->
 <section class="slide">
   <div class="kicker">parte 2 · demonstração</div>
-  <h1>Agora, <span class="accent">ao vivo</span><span style="color: var(--faint);"> (só que não)</span></h1>
+  <h1>Agora, <span class="accent">ao vivo</span></h1>
   <p class="lead" style="margin-top: 2vh; max-width: 62ch;">(ou não 🙃)</p>
 </section>
 
@@ -707,35 +707,16 @@
 <!-- ============ 16. AO VIVO — BRIDGE — PROMPT 2 ============ -->
 <section class="slide">
   <div class="kicker">ao vivo · opção 1 · bridge (sem mcp) · prompt 2 de 2 · visuais</div>
-  <h2>Opção 1 — Bridge: visuais em PBIR</h2>
-  <p class="lead" style="margin-top: -1.4vh; margin-bottom: 0.6vh;">Continuação do prompt 1 — Desktop continua <strong style="color: var(--text);">fechado até o fim</strong>. Só reabre depois de tudo salvo, pra conferir.</p>
-  <div class="promptbox promptfull">
-    <pre>FASE 2 — VISUAIS (skill /powerbi-report-authoring)
-Alvo: primeira página do relatório (crie se não houver).
-Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline
-zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em
-linguagem natural, nunca nome técnico de coluna.
-
-Antes de escrever visual.json, leia authoring.md § Erros Comuns e
-formatting.md. Não repita:
-  - field sem wrapper Column/Measure/Aggregation (Desktop não abre o
-    relatório)
-  - objects.* como objeto solto — sempre array [{ "properties": {...} }]
-  - literal sem sufixo D/L ("14pt", "8" cru), cor como string crua
-  - filterConfig dentro de "visual" (mora na raiz, irmão de "visual")
-  - position embrulhado em Literal (usa número direto: "x": 32)
-Gere cada literal com:
-  powerbi-report-author expr encode &lt;valor&gt; --kind &lt;bool|number|integer|string|color&gt;
-
-FECHAMENTO
-powerbi-report-author validate — 0 erros. PBIR_SCHEMA_UNREACHABLE significa
-que a checagem de schema foi PULADA, não é sucesso: aponte $schema
-temporariamente pra última versão publicada, revalide, corrija, restaure.
-Instrua o usuário: "Abra o .pbip no Power BI Desktop pra conferir."</pre>
+  <h2>Opção 1 — <span class="accent">Bridge</span>: visuais em PBIR</h2>
+  <p class="lead" style="margin-top: -1.4vh; margin-bottom: 0.6vh;">Continuação — Desktop continua <strong style="color: var(--text);">fechado até o fim</strong>. Só reabre depois de tudo salvo, pra conferir.</p>
+  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
+    Invoque a skill <span class="skill">/powerbi-report-authoring</span>. Alvo: primeira página do relatório (crie se não houver). Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em linguagem natural, nunca nome técnico de coluna.<br><br>
+    Antes de escrever <span class="mono">visual.json</span>, leia <span class="mono">authoring.md</span> § Erros Comuns e <span class="mono">formatting.md</span>. Não repita: field sem wrapper Column/Measure/Aggregation (Desktop não abre o relatório); objects.* como objeto solto — sempre array [{ "properties": {...} }]; literal sem sufixo D/L ("14pt", "8" cru), cor como string crua; filterConfig dentro de "visual" (mora na raiz, irmão de "visual"); position embrulhado em Literal (usa número direto: "x": 32). Gere cada literal com <span class="mono">powerbi-report-author expr encode &lt;valor&gt; --kind &lt;bool|number|integer|string|color&gt;</span>.<br><br>
+    FECHAMENTO: <span class="mono">powerbi-report-author validate</span> — 0 erros. PBIR_SCHEMA_UNREACHABLE significa que a checagem de schema foi PULADA, não é sucesso: aponte $schema temporariamente pra última versão publicada, revalide, corrija, restaure. Instrua o usuário: "Abra o .pbip no Power BI Desktop pra conferir."
   </div>
   <div class="note" style="margin-top: 1.2vh;"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
   <div class="flow-line" style="margin-top: 1.4vh;">
-    <span class="good">validate</span><span>→</span><span class="good">Desktop fechado até o fim</span><span>→</span><span class="good">abrir e conferir</span><span>→</span><span style="color: var(--text);">só então confirma</span>
+    <span class="good">validate</span><span>→</span><span class="good">Desktop fechado até o fim</span><span>→</span><span style="color: var(--text);">abrir e conferir</span>
   </div>
   <style>@keyframes blink { 50% { opacity: 0; } }</style>
 </section>
@@ -743,21 +724,12 @@ Instrua o usuário: "Abra o .pbip no Power BI Desktop pra conferir."</pre>
 <!-- ============ 16.5 AO VIVO — MCP — PROMPT 1 ============ -->
 <section class="slide">
   <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 2 de 2 · fase 1 · medidas</div>
-  <h2>Opção 2 — MCP: medida validada na hora</h2>
-  <p class="lead" style="margin-top: -1.6vh; margin-bottom: 1.8vh;">Via <span class="mono">powerbi-modeling-mcp</span>: cada medida é criada e validada na hora (<span class="mono">EVALUATE ROW</span>) antes de seguir pra próxima — sem esperar até o fim pra descobrir um erro.</p>
-  <div class="promptbox promptfull">
-    <pre>Continuação: plano já está em _status/plano.md. Desktop segue ABERTO.
-Execute até o fim, sem pedir confirmação.
-
-FASE 1 — MEDIDAS (skill /semantic-model-authoring, via powerbi-modeling-mcp)
-Liste as medidas existentes (INFO.MEASURES()). NÃO crie duplicata.
-Para cada medida do plano que ainda não existe:
-  measure_operations → Create
-    { tableName, name, expression, formatString, displayFolder }
-  dax_query_operations → EVALUATE ROW("t",[&lt;medida&gt;])
-  Erro → mostre o texto exato, corrija, revalide. Não avance com erro.
-Ao final de TODAS: database_operations → ExportToTmdlFolder
-(uma vez só, não por medida — grava o TMDL em UTF-8 correto).</pre>
+  <h2>Opção 2 — <span class="accent">MCP</span>: medida validada na hora</h2>
+  <p class="lead" style="margin-top: -1.6vh; margin-bottom: 1.8vh;">Via <span class="mono">powerbi-modeling-mcp</span>: cada medida é criada e validada na hora antes de seguir pra próxima — sem esperar até o fim pra descobrir um erro.</p>
+  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
+    Continuação: plano já está em <span class="mono">_status/plano.md</span>. Desktop segue <strong style="color: var(--text);">ABERTO</strong>. Execute até o fim, sem pedir confirmação.<br><br>
+    Invoque a skill <span class="skill">/semantic-model-authoring</span>, via <span class="mono">powerbi-modeling-mcp</span>. Liste as medidas existentes (<span class="mono">INFO.MEASURES()</span>). NÃO crie duplicata. Para cada medida do plano que ainda não existe: <span class="mono">measure_operations</span> → Create { tableName, name, expression, formatString, displayFolder }, depois <span class="mono">dax_query_operations</span> → <span class="mono">EVALUATE ROW("t",[&lt;medida&gt;])</span>. Erro → mostre o texto exato, corrija, revalide. Não avance com erro.<br><br>
+    Ao final de TODAS: <span class="mono">database_operations</span> → <span class="mono">ExportToTmdlFolder</span> (uma vez só, não por medida — grava o TMDL em UTF-8 correto).
   </div>
   <div class="note"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
 </section>
@@ -765,28 +737,12 @@ Ao final de TODAS: database_operations → ExportToTmdlFolder
 <!-- ============ 16.6 AO VIVO — MCP — PROMPT 2 ============ -->
 <section class="slide">
   <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 2 de 2 · fase 2 · visuais</div>
-  <h2>Opção 2 — MCP: visuais em PBIR</h2>
+  <h2>Opção 2 — <span class="accent">MCP</span>: visuais em PBIR</h2>
   <p class="lead" style="margin-top: -1.4vh; margin-bottom: 0.6vh;">Continuação — Desktop continua <strong style="color: var(--text);">aberto</strong>. No fim, o Bridge recarrega e tira o print sozinho.</p>
-  <div class="promptbox promptfull">
-    <pre>FASE 2 — VISUAIS (skill /powerbi-report-authoring)
-Alvo: primeira página do relatório (crie se não houver).
-Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline
-zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em
-linguagem natural, nunca nome técnico de coluna.
-
-Antes de escrever visual.json, leia authoring.md § Erros Comuns e
-formatting.md. Não repita:
-  - field sem wrapper Column/Measure/Aggregation (Desktop não abre o
-    relatório)
-  - objects.* como objeto solto — sempre array [{ "properties": {...} }]
-  - literal sem sufixo D/L ("14pt", "8" cru), cor como string crua
-  - filterConfig dentro de "visual" (mora na raiz, irmão de "visual")
-Gere cada literal com:
-  powerbi-report-author expr encode &lt;valor&gt; --kind &lt;bool|number|integer|string|color&gt;
-
-FECHAMENTO
-powerbi-report-author validate — 0 erros (PBIR_SCHEMA_UNREACHABLE = checagem
-pulada, não é sucesso). powerbi-desktop reload → screenshot da página.</pre>
+  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
+    Invoque a skill <span class="skill">/powerbi-report-authoring</span>. Alvo: primeira página do relatório (crie se não houver). Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em linguagem natural, nunca nome técnico de coluna.<br><br>
+    Antes de escrever <span class="mono">visual.json</span>, leia <span class="mono">authoring.md</span> § Erros Comuns e <span class="mono">formatting.md</span>. Não repita: field sem wrapper Column/Measure/Aggregation (Desktop não abre o relatório); objects.* como objeto solto — sempre array [{ "properties": {...} }]; literal sem sufixo D/L ("14pt", "8" cru), cor como string crua; filterConfig dentro de "visual" (mora na raiz, irmão de "visual"). Gere cada literal com <span class="mono">powerbi-report-author expr encode &lt;valor&gt; --kind &lt;bool|number|integer|string|color&gt;</span>.<br><br>
+    FECHAMENTO: <span class="mono">powerbi-report-author validate</span> — 0 erros (PBIR_SCHEMA_UNREACHABLE = checagem pulada, não é sucesso). <span class="mono">powerbi-desktop reload</span> → screenshot da página.
   </div>
   <div class="note" style="margin-top: 1.2vh;"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
   <div class="flow-line" style="margin-top: 1.4vh;">
