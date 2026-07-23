@@ -99,8 +99,8 @@ Dentro do OpenClaude já aberto:
 1. Abrir o Power BI Desktop
 2. Obter dados → conectar a base (é a fonte que vira o modelo semântico)
 3. Salvar como projeto `.pbip` — Arquivo → Salvar como → Power BI Project
-4. Fechar o Desktop — obrigatório pra **Opção 1 (Bridge)**; pra **Opção 2
-   (MCP)**, reabra antes do prompt 1 dela
+4. Fechar o Desktop — somente se for executar a **Opção 1 (Bridge)**; pra
+   **Opção 2 (MCP)**, mantenha o PBI aberto
 
 Duas opções de fluxo a partir daqui — escolha uma. Os dois entregam o mesmo
 resultado (1 card KPI + 1 gráfico de barras); a diferença é a ferramenta e

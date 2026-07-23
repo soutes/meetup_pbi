@@ -673,7 +673,7 @@
 <section class="slide">
   <div class="kicker">parte 2 · demonstração</div>
   <h1>Agora, <span class="accent">ao vivo</span><span style="color: var(--faint);"> (só que não)</span></h1>
-  <p class="lead" style="margin-top: 2vh; max-width: 62ch;">Prometo tentar ao vivo — mas já gravei o prompt rodando antes, porque Wi-Fi de auditório é sempre uma aposta. Se a internet me abandonar no palco, a gente assiste ao vídeo e finge que era o plano B o tempo todo.</p>
+  <p class="lead" style="margin-top: 2vh; max-width: 62ch;">(ou não 🙃)</p>
 </section>
 
 <!-- ============ 14.5 PREPARAR O AMBIENTE ============ -->
@@ -684,7 +684,7 @@
     <li><span class="tick">1</span><div>Abrir o <span class="mono">Power BI Desktop</span></div></li>
     <li><span class="tick">2</span><div>Obter dados → conectar a base &nbsp;<span class="why">é a fonte que vira o modelo semântico</span></div></li>
     <li><span class="tick">3</span><div>Salvar como projeto <span class="mono accent">.pbip</span> &nbsp;<span class="why">Arquivo → Salvar como → Power BI Project</span></div></li>
-    <li><span class="tick">4</span><div>Fechar o Desktop &nbsp;<span class="why">obrigatório pro fluxo Bridge (TMDL direto); no fluxo MCP, reabra antes do prompt 1</span></div></li>
+    <li><span class="tick">4</span><div>Fechar o Desktop &nbsp;<span class="why">(somente se for executar fluxo Bridge; no fluxo MCP, mantenha o PBI aberto)</span></div></li>
   </ul>
 </section>
 
@@ -693,8 +693,13 @@
   <div class="kicker">ao vivo · opção 1 · bridge (sem mcp) · prompt 1 de 2 · descoberta e plano</div>
   <h2>Opção 1 — Bridge: modelo mapeado direto do TMDL</h2>
   <p class="lead" style="margin-top: -1.6vh; margin-bottom: 1.8vh;">Sem MCP: leitura direta dos arquivos <span class="mono">.tmdl</span>. O Power BI Desktop fica <strong style="color: var(--text);">fechado desde este primeiro prompt</strong> — o Bridge só entra no fim, pra recarregar e tirar print.</p>
-  <div class="promptbox">
-    Invoque a skill <span class="skill">/semantic-model-authoring</span>, caminho TMDL direto — sem <span class="mono">powerbi-modeling-mcp</span> neste fluxo, Desktop <strong style="color: var(--text);">FECHADO</strong> (aberto, sobrescreve qualquer edição de TMDL em disco). Leia só arquivos de definição (.tmdl, .json) — nunca dado bruto. Liste tabelas, colunas, medidas e relacionamentos; resuma fato/dimensão e cardinalidade. Proponha 1 card KPI e 1 gráfico de barras, com as medidas necessárias (nome, DAX, formatString, displayFolder — ASCII, sem acento). Grave o plano em <span class="mono">_status/plano.md</span> e pare aí.
+  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
+    Você é engenheiro Power BI. Execute até o fim sem pedir confirmação. Existe um projeto .pbip nesta pasta, com modelo e dataset desconhecidos — descubra tudo agora, não assuma nomes de nenhum outro projeto.<br><br>
+    Invoque a skill <span class="skill">/semantic-model-authoring</span>, caminho TMDL direto (Tier 2) — NUNCA use <span class="mono">powerbi-modeling-mcp</span> neste fluxo, mesmo que esteja registrado. Power BI Desktop deve estar <strong style="color: var(--text);">FECHADO</strong>: aberto, ele sobrescreve qualquer edição de TMDL feita em disco.<br><br>
+    Leia SOMENTE arquivos de definição (<span class="mono">*.tmdl</span>, <span class="mono">*.json</span> em <span class="mono">&lt;nome&gt;.SemanticModel/definition/</span> e <span class="mono">&lt;nome&gt;.Report/definition/</span>) — nunca CSV, Excel, cache.abf ou qualquer engine de query. Dados de linha não entram no contexto da IA.<br><br>
+    Liste tabelas, colunas (com tipo), medidas existentes e relacionamentos. Resuma tabela(s) fato, dimensões, cardinalidade. Use só nomes lidos dos arquivos — não invente.<br><br>
+    Proponha exatamente 2 visuais nativos — 1 card KPI e 1 gráfico de barras — com as medidas necessárias: name, expression DAX, formatString conforme a natureza (moeda "R$ #,##0.00" | contagem "#,##0" | ratio "0.0%"), displayFolder. Nomes de medida em ASCII puro, sem acento — o TMDL vai ser editado à mão no próximo prompt e acento com encoding errado corrompe o arquivo. Se já existir medida equivalente, reuse.<br><br>
+    Grave o plano em <span class="mono">_status/plano.md</span>: schema resumido, tabela e arquivo .tmdl alvo, os 2 visuais e as medidas propostas. Mostre o plano e pare — a criação vem no próximo prompt.
   </div>
   <div class="note"><span class="tag">formato</span><span>Denso e direto: a skill certa já invocada com <span class="mono">/skill</span>, contexto completo, zero ida-e-volta.</span></div>
 </section>
