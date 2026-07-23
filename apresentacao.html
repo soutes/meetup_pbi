@@ -691,62 +691,328 @@
 <!-- ============ 15. AO VIVO — BRIDGE — PROMPT 1 ============ -->
 <section class="slide">
   <div class="kicker">ao vivo · opção 1 · bridge (sem mcp) · prompt 1 de 2 · descoberta e plano</div>
-  <h2>Opção 1 — <span class="accent">Bridge</span>: modelo mapeado direto do TMDL</h2>
-  <p class="lead" style="margin-top: -1.6vh; margin-bottom: 1.8vh;">Sem MCP: leitura direta dos arquivos <span class="mono">.tmdl</span>. O Power BI Desktop fica <strong style="color: var(--text);">fechado desde este primeiro prompt</strong> — no fluxo via Bridge, vamos criar as medidas e visuais diretamente no PBIR. Power BI Desktop só abre quando concluir a fase 2 do prompt.</p>
-  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
-    Você é engenheiro Power BI. Execute até o fim sem pedir confirmação. Existe um projeto .pbip nesta pasta, com modelo e dataset desconhecidos — descubra tudo agora, não assuma nomes de nenhum outro projeto.<br><br>
-    Invoque a skill <span class="skill">/semantic-model-authoring</span>, caminho TMDL direto (Tier 2) — NUNCA use <span class="mono">powerbi-modeling-mcp</span> neste fluxo, mesmo que esteja registrado. Power BI Desktop deve estar <strong style="color: var(--text);">FECHADO</strong>: aberto, ele sobrescreve qualquer edição de TMDL feita em disco.<br><br>
-    Leia SOMENTE arquivos de definição (<span class="mono">*.tmdl</span>, <span class="mono">*.json</span> em <span class="mono">&lt;nome&gt;.SemanticModel/definition/</span> e <span class="mono">&lt;nome&gt;.Report/definition/</span>) — nunca CSV, Excel, cache.abf ou qualquer engine de query. Dados de linha não entram no contexto da IA.<br><br>
-    Liste tabelas, colunas (com tipo), medidas existentes e relacionamentos. Resuma tabela(s) fato, dimensões, cardinalidade. Use só nomes lidos dos arquivos — não invente.<br><br>
-    Proponha exatamente 2 visuais nativos — 1 card KPI e 1 gráfico de barras — com as medidas necessárias: name, expression DAX, formatString conforme a natureza (moeda "R$ #,##0.00" | contagem "#,##0" | ratio "0.0%"), displayFolder. Nomes de medida em ASCII puro, sem acento — o TMDL vai ser editado à mão no próximo prompt e acento com encoding errado corrompe o arquivo. Se já existir medida equivalente, reuse.<br><br>
-    Grave o plano em <span class="mono">_status/plano.md</span>: schema resumido, tabela e arquivo .tmdl alvo, os 2 visuais e as medidas propostas. Mostre o plano e pare — a criação vem no próximo prompt.
+  <h2>Opção 1 — <span class="accent">Bridge</span>: descoberta e plano</h2>
+  <div class="promptbox promptfull" style="margin-top: 0.4vh;">
+    <pre style="font-size: clamp(6.5px, 0.6vw, 9px); line-height: 1.3; max-height: 76vh;">Você é engenheiro Power BI. Execute até o fim sem pedir confirmação.
+Contexto: existe um projeto .pbip nesta pasta (ou no caminho que o usuário
+informar), com um modelo e dataset desconhecidos — descubra tudo agora, não
+assuma nomes de tabela/coluna de nenhum outro projeto.
+
+═══ PASSO 0 — PRÉ-REQUISITOS ═══
+1. Confirme que a skill semantic-model-authoring está disponível (invocável
+   por nome, ou os arquivos SKILL.md/references/ estão localizáveis). Se não
+   estiver, PARE e diga: "Instale a pasta skills-for-fabric/skills no escopo
+   global antes de continuar."
+2. powerbi-report-author --version → se faltar: PARE e instrua a instalação.
+3. Pule a checagem de atualização da skill (check-updates) — não é
+   necessária para este fluxo de 2 prompts.
+
+═══ GUARDRAIL LGPD (obrigatório) ═══
+Leia SOMENTE arquivos de definição: *.tmdl e *.json dentro de
+&lt;nome&gt;.SemanticModel/definition/ e &lt;nome&gt;.Report/definition/.
+NUNCA abra arquivos de dados (CSV, Excel, parquet, cache.abf etc.) e nunca
+execute queries. Dados brutos podem conter dados pessoais e não devem entrar
+no contexto da IA.
+
+═══ DESCOBERTA (via skill semantic-model-authoring) ═══
+Invoque a skill semantic-model-authoring. Mesmo que powerbi-modeling-mcp
+esteja registrado, IGNORE-O — force o caminho Tier 2 (TMDL direto) descrito
+na skill, lendo os arquivos .tmdl em &lt;nome&gt;.SemanticModel/definition/
+(tables/*.tmdl, relationships.tmdl). Nunca use MCP neste fluxo.
+
+1. Extraia dos .tmdl: tabelas, colunas (nome + dataType), medidas
+   existentes, relacionamentos.
+2. Resuma: tabela(s) fato, dimensões, cardinalidade, medidas já existentes.
+   Use SOMENTE nomes lidos dos arquivos — não invente.
+
+═══ PROPOSTA (não crie nada ainda) ═══
+3. Sugira exatamente 2 visuais nativos, escolhidos a partir do schema real:
+   - 1 card KPI: qual medida e por quê.
+   - 1 gráfico de barras: qual medida × qual categoria e por quê.
+4. Para cada visual, defina a(s) medida(s) necessária(s) com:
+   name, expression DAX, formatString conforme a natureza (moeda
+   "R$ #,##0.00" | contagem "#,##0" | ratio "0.0%"), displayFolder.
+   Restrições (não haverá validação DAX antes de abrir o Desktop):
+   - só agregações simples: SUM / AVERAGE / COUNT / DIVIDE;
+   - nomes de tabela e coluna copiados EXATAMENTE dos .tmdl;
+   - name e displayFolder das medidas novas em ASCII puro, SEM acento
+     (ex.: "Salario Medio") — o TMDL será editado à mão e acento com
+     encoding errado corrompe o arquivo (ver regra de encoding no Prompt 2).
+     Nomes com acento ficam nos títulos/labels dos visuais;
+   - se já existir medida equivalente, reuse — não proponha duplicata.
+
+═══ HANDOFF ═══
+5. Grave o plano em `_status/plano.md` na pasta do .pbip: schema resumido,
+   nome exato da tabela alvo e do arquivo .tmdl dela, os 2 visuais e as
+   medidas propostas (name, expression, formatString, displayFolder).
+   Esse arquivo é a única memória do prompt de execução.
+6. Mostre o plano em tabela resumida e finalize com:
+   "Plano gravado em _status/plano.md. FECHE o Power BI Desktop e rode o
+   prompt 2."</pre>
   </div>
-  <div class="note"><span class="tag">formato</span><span>Denso e direto: a skill certa já invocada com <span class="mono">/skill</span>, contexto completo, zero ida-e-volta.</span></div>
 </section>
 
 <!-- ============ 16. AO VIVO — BRIDGE — PROMPT 2 ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · opção 1 · bridge (sem mcp) · prompt 2 de 2 · visuais</div>
-  <h2>Opção 1 — <span class="accent">Bridge</span>: visuais em PBIR</h2>
-  <p class="lead" style="margin-top: -1.4vh; margin-bottom: 0.6vh;">Continuação — Desktop continua <strong style="color: var(--text);">fechado até o fim</strong>. Só reabre depois de tudo salvo, pra conferir.</p>
-  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
-    Invoque a skill <span class="skill">/powerbi-report-authoring</span>. Alvo: primeira página do relatório (crie se não houver). Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em linguagem natural, nunca nome técnico de coluna.<br><br>
-    Antes de escrever <span class="mono">visual.json</span>, leia <span class="mono">authoring.md</span> § Erros Comuns e <span class="mono">formatting.md</span>. Não repita: field sem wrapper Column/Measure/Aggregation (Desktop não abre o relatório); objects.* como objeto solto — sempre array [{ "properties": {...} }]; literal sem sufixo D/L ("14pt", "8" cru), cor como string crua; filterConfig dentro de "visual" (mora na raiz, irmão de "visual"); position embrulhado em Literal (usa número direto: "x": 32). Gere cada literal com <span class="mono">powerbi-report-author expr encode &lt;valor&gt; --kind &lt;bool|number|integer|string|color&gt;</span>.<br><br>
-    FECHAMENTO: <span class="mono">powerbi-report-author validate</span> — 0 erros. PBIR_SCHEMA_UNREACHABLE significa que a checagem de schema foi PULADA, não é sucesso: aponte $schema temporariamente pra última versão publicada, revalide, corrija, restaure. Instrua o usuário: "Abra o .pbip no Power BI Desktop pra conferir."
-  </div>
-  <div class="note" style="margin-top: 1.2vh;"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
-  <div class="flow-line" style="margin-top: 1.4vh;">
-    <span class="good">validate</span><span>→</span><span class="good">Desktop fechado até o fim</span><span>→</span><span style="color: var(--text);">abrir e conferir</span>
+  <div class="kicker">ao vivo · opção 1 · bridge (sem mcp) · prompt 2 de 2 · execução completa</div>
+  <h2>Opção 1 — <span class="accent">Bridge</span>: execução completa</h2>
+  <div class="promptbox promptfull" style="margin-top: 0.4vh;">
+    <pre style="font-size: clamp(6.5px, 0.6vw, 9px); line-height: 1.3; max-height: 76vh;">Você é engenheiro Power BI. Execute até o fim sem pedir confirmação.
+Pare apenas se faltar pré-requisito.
+
+═══ REGRA CRÍTICA Nº 1 — DESKTOP FECHADO ═══
+O Power BI Desktop deve estar FECHADO: aberto, ele mantém o modelo em
+memória e sobrescreve qualquer edição de TMDL feita em disco.
+Verificação: powerbi-desktop status → se retornar instância ativa /
+reportDir preenchido, PARE e peça pro usuário fechar o Desktop.
+Se o CLI powerbi-desktop não existir na máquina, peça confirmação explícita
+do usuário de que o Desktop está fechado antes de continuar.
+
+═══ CONTEXTO ═══
+Leia `_status/plano.md` na pasta do .pbip (gerado pelo prompt 1). Se não
+existir e o plano não estiver nesta sessão: PARE e peça pra rodar o prompt 1.
+
+═══ PRÉ-REQUISITOS ═══
+- powerbi-report-author --version → se faltar: PARE e instrua a instalação.
+- Confirme acesso às skills semantic-model-authoring e
+  powerbi-report-authoring (por nome ou pelos arquivos .md). Sem elas, as
+  regras abaixo são a única rede de segurança — não pule nenhuma.
+
+═══ GUARDRAIL LGPD ═══
+Só arquivos de definição (*.tmdl, *.json). Nunca arquivos de dados.
+
+═══ FASE 1 — MEDIDAS (edição direta de TMDL, via skill semantic-model-authoring) ═══
+
+Invoque a skill semantic-model-authoring, caminho Tier 2 (TMDL direto —
+sem MCP, mesmo se registrado). Leia tmdl-guidelines-pt-BR.md antes de editar
+qualquer .tmdl — ela cobre nomenclatura e formato de measure. Regra de
+encoding abaixo é ADICIONAL a ela (rede de segurança extra deste fluxo, por
+rodar em máquinas de terceiros sem supervisão):
+
+REGRA DE ENCODING (obrigatória — TMDL exige UTF-8; gravação errada
+corrompe o arquivo e o Desktop não abre: "Não é possível converter
+bytes [E9] ... para Unicode"):
+a) NUNCA escreva/edite .tmdl via shell (Set-Content, Out-File, echo &gt;,
+   sed, heredoc) — pode gravar em ANSI. Use SOMENTE a ferramenta de edição
+   de arquivo nativa do seu ambiente (a que preserva UTF-8).
+b) Todo texto que VOCÊ inserir no .tmdl deve ser ASCII puro — SEM
+   acentos em name, descrição (///) e displayFolder (ex.: "Salario
+   Medio", não "Salário Médio"). Nomes bonitos com acento vão nos
+   títulos/labels dos visuais (Fase 2), nunca no TMDL. Acentos já
+   existentes no arquivo (gravados pelo Desktop) ficam como estão — não
+   os toque.
+c) Após CADA edição de .tmdl, valide o encoding antes de continuar:
+   powershell -Command "[IO.File]::ReadAllText('&lt;arquivo&gt;.tmdl',[Text.UTF8Encoding]::new($false,$true))&gt;$null;'UTF-8 OK'"
+   (ou equivalente no seu SO). Se lançar erro de conversão, o arquivo está
+   corrompido: reescreva-o inteiro em UTF-8 e valide de novo. Não avance
+   sem "UTF-8 OK".
+
+1. Abra o .tmdl da tabela alvo (caminho no plano). Liste as medidas
+   existentes — NÃO crie duplicata (o Desktop rejeita: "TMDL objects
+   cannot be merged").
+2. Insira cada medida do plano ANTES das colunas, no formato:
+
+   /// Descricao da medida (ASCII, sem acento)
+   measure 'Nome' = EXPRESSAO_DAX
+     formatString: &lt;formato&gt;
+     displayFolder: &lt;pasta&gt;
+
+3. Siga EXATAMENTE o padrão de indentação do arquivo existente (TMDL é
+   sensível a indentação). Revise cada expression contra os nomes exatos
+   de coluna do arquivo — é a única validação disponível.
+
+═══ FASE 2 — VISUAIS (via skill powerbi-report-authoring) ═══
+
+Invoque a skill powerbi-report-authoring. Antes de escrever qualquer
+visual.json, leia references/authoring.md (seção "Erros Comuns") e
+references/formatting.md — cobrem, entre outros, os padrões abaixo que já
+derrubaram builds anteriores. Não reproduza esses erros:
+
+- `field` sem wrapper `Column`/`Measure`/`Aggregation` (o Desktop não abre
+  o relatório).
+- `objects.*` como objeto solto em vez de array `[{ "properties": {...} }]`.
+- Literais malformados: `"14pt"`, número sem sufixo `D`/`L`, cor como string
+  crua em vez de `{"solid":{"color":{"expr":{"Literal":{"Value":"'#RRGGBB'"}}}}}`.
+  Gere cada literal via `powerbi-report-author expr encode &lt;valor&gt; --kind
+  &lt;bool|number|integer|string|color&gt;`.
+- `filterConfig` na RAIZ do visual.json (irmão de `visual`), nunca dentro
+  de `visual`.
+- `position` com números diretos, nunca envolto em `{"expr":{"Literal":...}}`.
+- Se `powerbi-report-author validate` reportar `PBIR_SCHEMA_UNREACHABLE`, a
+  checagem de schema foi PULADA — não é sucesso. Siga o procedimento da
+  skill (SKILL.md § Validation result handling): apontar temporariamente
+  `$schema` pra última versão publicada, revalidar, corrigir, restaurar.
+
+Alvo: primeira página do relatório (crie se não houver).
+
+Layout (canvas 1920×1080, grid 8px, margem 32):
+- Card KPI:  x=32  y=32   w=360  h=200
+- Barras:    x=32  y=264  w=920  h=480 — horizontal se for ranking,
+  baseline zero sempre, ordenado descendente.
+
+Nomes legíveis: título do visual = pergunta analítica; eixos e labels com
+display names em linguagem natural, nunca nome técnico de coluna.
+
+Grave arquivos do PBIR SOMENTE via ferramenta de edição de arquivo nativa
+(nunca via shell), sempre UTF-8 — mesma regra de encoding da Fase 1.
+
+═══ FASE 3 — FECHAMENTO ═══
+1. powerbi-report-author validate (1 vez). Warning de "htmlContent" é
+   ignorável; PBIR_SCHEMA_UNREACHABLE exige o procedimento da Fase 2 antes
+   de concluir.
+2. Instrua o usuário: "Abra o .pbip no Power BI Desktop (File → Open) para
+   conferir. Se alguma medida der erro, me envie o texto exato que eu
+   corrijo."
+3. Opcional: depois que o usuário confirmar o Desktop aberto, rode
+   powerbi-desktop screenshot para verificação visual.</pre>
   </div>
   <style>@keyframes blink { 50% { opacity: 0; } }</style>
 </section>
 
 <!-- ============ 16.5 AO VIVO — MCP — PROMPT 1 ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 2 de 2 · fase 1 · medidas</div>
-  <h2>Opção 2 — <span class="accent">MCP</span>: medida validada na hora</h2>
-  <p class="lead" style="margin-top: -1.6vh; margin-bottom: 1.8vh;">Via <span class="mono">powerbi-modeling-mcp</span>: cada medida é criada e validada na hora antes de seguir pra próxima — sem esperar até o fim pra descobrir um erro.</p>
-  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
-    Continuação: plano já está em <span class="mono">_status/plano.md</span>. Desktop segue <strong style="color: var(--text);">ABERTO</strong>. Execute até o fim, sem pedir confirmação.<br><br>
-    Invoque a skill <span class="skill">/semantic-model-authoring</span>, via <span class="mono">powerbi-modeling-mcp</span>. Liste as medidas existentes (<span class="mono">INFO.MEASURES()</span>). NÃO crie duplicata. Para cada medida do plano que ainda não existe: <span class="mono">measure_operations</span> → Create { tableName, name, expression, formatString, displayFolder }, depois <span class="mono">dax_query_operations</span> → <span class="mono">EVALUATE ROW("t",[&lt;medida&gt;])</span>. Erro → mostre o texto exato, corrija, revalide. Não avance com erro.<br><br>
-    Ao final de TODAS: <span class="mono">database_operations</span> → <span class="mono">ExportToTmdlFolder</span> (uma vez só, não por medida — grava o TMDL em UTF-8 correto).
+  <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 1 de 2 · descoberta e plano</div>
+  <h2>Opção 2 — <span class="accent">MCP</span>: descoberta e plano</h2>
+  <div class="promptbox promptfull" style="margin-top: 0.4vh;">
+    <pre style="font-size: clamp(6.5px, 0.6vw, 9px); line-height: 1.3; max-height: 76vh;">Você é engenheiro Power BI. Execute até o fim sem pedir confirmação.
+Contexto: existe um .pbip aberto no Power BI Desktop nesta máquina, com um
+modelo e dataset desconhecidos — descubra tudo agora, não assuma nomes de
+tabela/coluna de nenhum outro projeto.
+
+═══ PASSO 0 — PRÉ-REQUISITOS ═══
+1. Conecte ao modelo via powerbi-modeling-mcp (connection_operations →
+   instância local do Desktop). Se não conectar: PARE e instrua o usuário a
+   (1) abrir o .pbip no Power BI Desktop e (2) confirmar que o
+   powerbi-modeling-mcp está registrado. Não tente fallback editando TMDL
+   na mão.
+2. Confirme que a skill semantic-model-authoring está disponível (invocável
+   por nome, ou os arquivos SKILL.md/references/ estão localizáveis). Se não
+   estiver, avise o usuário e prossiga só com o MCP — as regras deste
+   prompt cobrem o essencial, mas sem a skill perde-se a rede de segurança
+   extra.
+3. Pule a checagem de atualização da skill (check-updates) — não é
+   necessária para este fluxo de 2 prompts.
+
+═══ GUARDRAIL LGPD (obrigatório) ═══
+- Use SOMENTE queries de metadata: INFO.TABLES(), INFO.COLUMNS(),
+  INFO.MEASURES(), INFO.RELATIONSHIPS().
+- NUNCA execute EVALUATE sobre tabelas ou colunas do modelo (nada de amostrar
+  linhas). Dados brutos podem conter dados pessoais e não devem entrar no
+  contexto da IA.
+
+═══ DESCOBERTA ═══
+1. Via dax_query_operations + INFO.*, liste: tabelas, colunas (com tipo),
+   medidas existentes, relacionamentos.
+2. Resuma: tabela(s) fato, dimensões, cardinalidade dos relacionamentos,
+   medidas já existentes. Use SOMENTE nomes retornados — não invente.
+
+═══ PROPOSTA (não crie nada ainda) ═══
+3. Sugira exatamente 2 visuais nativos, escolhidos a partir do schema real:
+   - 1 card KPI: qual medida e por quê.
+   - 1 gráfico de barras: qual medida × qual categoria e por quê.
+4. Para cada visual, defina a(s) medida(s) necessária(s) com:
+   name, expression DAX (só agregações simples: SUM / AVERAGE / COUNT /
+   DIVIDE), formatString conforme a natureza (moeda "R$ #,##0.00" |
+   contagem "#,##0" | ratio "0.0%"), displayFolder.
+   Se já existir medida equivalente no modelo, reuse — não proponha duplicata.
+
+═══ HANDOFF ═══
+5. Grave o plano em `_status/plano.md` na pasta do .pbip: schema resumido,
+   nome exato da tabela alvo, os 2 visuais e as medidas propostas (name,
+   expression, formatString, displayFolder). Esse arquivo é a única memória
+   do prompt de execução.
+6. Mostre o plano em tabela resumida e finalize com:
+   "Plano gravado em _status/plano.md. Rode o prompt 2 para executar."</pre>
   </div>
-  <div class="note"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
 </section>
 
 <!-- ============ 16.6 AO VIVO — MCP — PROMPT 2 ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 2 de 2 · fase 2 · visuais</div>
-  <h2>Opção 2 — <span class="accent">MCP</span>: visuais em PBIR</h2>
-  <p class="lead" style="margin-top: -1.4vh; margin-bottom: 0.6vh;">Continuação — Desktop continua <strong style="color: var(--text);">aberto</strong>. No fim, o Bridge recarrega e tira o print sozinho.</p>
-  <div class="promptbox" style="font-size: clamp(12.5px, 1.3vw, 17px); line-height: 1.55;">
-    Invoque a skill <span class="skill">/powerbi-report-authoring</span>. Alvo: primeira página do relatório (crie se não houver). Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em linguagem natural, nunca nome técnico de coluna.<br><br>
-    Antes de escrever <span class="mono">visual.json</span>, leia <span class="mono">authoring.md</span> § Erros Comuns e <span class="mono">formatting.md</span>. Não repita: field sem wrapper Column/Measure/Aggregation (Desktop não abre o relatório); objects.* como objeto solto — sempre array [{ "properties": {...} }]; literal sem sufixo D/L ("14pt", "8" cru), cor como string crua; filterConfig dentro de "visual" (mora na raiz, irmão de "visual"). Gere cada literal com <span class="mono">powerbi-report-author expr encode &lt;valor&gt; --kind &lt;bool|number|integer|string|color&gt;</span>.<br><br>
-    FECHAMENTO: <span class="mono">powerbi-report-author validate</span> — 0 erros (PBIR_SCHEMA_UNREACHABLE = checagem pulada, não é sucesso). <span class="mono">powerbi-desktop reload</span> → screenshot da página.
-  </div>
-  <div class="note" style="margin-top: 1.2vh;"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
-  <div class="flow-line" style="margin-top: 1.4vh;">
-    <span class="good">validate</span><span>→</span><span class="good">reload</span><span>→</span><span class="good">screenshot</span><span>→</span><span style="color: var(--text);">só então confirma</span>
+  <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 2 de 2 · execução completa</div>
+  <h2>Opção 2 — <span class="accent">MCP</span>: execução completa</h2>
+  <div class="promptbox promptfull" style="margin-top: 0.4vh;">
+    <pre style="font-size: clamp(6.5px, 0.6vw, 9px); line-height: 1.3; max-height: 76vh;">Você é engenheiro Power BI. Execute até o fim sem pedir confirmação.
+Pare apenas se faltar pré-requisito.
+
+═══ CONTEXTO ═══
+- Leia `_status/plano.md` na pasta do .pbip (gerado pelo prompt 1). Se não
+  existir e o plano não estiver nesta sessão: PARE e peça pra rodar o prompt 1.
+- O Desktop está aberto com o .pbip. NUNCA edite arquivos .tmdl manualmente —
+  o Desktop sobrescreve edições feitas em disco.
+
+═══ PRÉ-REQUISITOS ═══
+- powerbi-report-author --version e powerbi-desktop --version → se faltar
+  algum: PARE e instrua a instalação.
+- powerbi-desktop status → reportDir deve apontar pro .pbip do plano.
+  Se null: PARE e peça pra abrir o .pbip no Desktop.
+- Confirme acesso às skills semantic-model-authoring e
+  powerbi-report-authoring (por nome ou pelos arquivos .md). Sem elas, as
+  regras abaixo são a única rede de segurança — não pule nenhuma.
+
+═══ GUARDRAIL LGPD ═══
+Só queries INFO.* e validação de medida com EVALUATE ROW("t",[medida])
+(retorna agregado). NUNCA EVALUATE sobre tabela/coluna bruta.
+
+═══ FASE 1 — MEDIDAS (via powerbi-modeling-mcp; skill semantic-model-authoring, Tier 1) ═══
+
+Invoque a skill semantic-model-authoring — o MCP registrado ativa
+automaticamente o caminho Tier 1 (mais confiável) da skill. NUNCA edite
+.tmdl na mão neste fluxo.
+
+1. Liste as medidas existentes (INFO.MEASURES()). NÃO crie duplicata —
+   o Desktop rejeita TMDL com objetos duplicados.
+2. Para cada medida do plano que ainda não existe:
+   a) measure_operations → Create
+      { tableName, name, expression, formatString, displayFolder }
+   b) dax_query_operations → EVALUATE ROW("t",[&lt;medida&gt;]).
+      Erro → mostre o texto exato, corrija, revalide. Não avance com erro.
+3. Ao final de TODAS as medidas: database_operations → ExportToTmdlFolder
+   (1 vez só, não por medida — ele grava o TMDL em UTF-8 correto).
+
+═══ FASE 2 — VISUAIS (via skill powerbi-report-authoring) ═══
+
+Invoque a skill powerbi-report-authoring. Antes de escrever qualquer
+visual.json, leia references/authoring.md (seção "Erros Comuns") e
+references/formatting.md — cobrem, entre outros, os padrões abaixo que já
+derrubaram builds anteriores. Não reproduza esses erros:
+
+- `field` sem wrapper `Column`/`Measure`/`Aggregation` (o Desktop não abre
+  o relatório).
+- `objects.*` como objeto solto em vez de array `[{ "properties": {...} }]`
+  — inclusive `visualContainerObjects` (dentro de `visual`, nunca na raiz).
+- Literais malformados: `"14pt"`, número sem sufixo `D`/`L`, cor como string
+  crua em vez de `{"solid":{"color":{"expr":{"Literal":{"Value":"'#RRGGBB'"}}}}}`.
+  Gere cada literal via `powerbi-report-author expr encode &lt;valor&gt; --kind
+  &lt;bool|number|integer|string|color&gt;`.
+- `filterConfig` na RAIZ do visual.json (irmão de `visual`), nunca dentro
+  de `visual`. Filtro TopN vai em `filters` no nível do visual, NÃO dentro
+  de `query`.
+- `position` com números diretos, nunca envolto em `{"expr":{"Literal":...}}`.
+- Grave arquivos do PBIR SOMENTE via ferramenta de edição de arquivo nativa
+  (nunca via shell tipo Set-Content/Out-File/echo — corrompe encoding).
+- Valide o JSON (`JSON.parse` ou equivalente) antes de rodar `validate`.
+- Se `powerbi-report-author validate` reportar `PBIR_SCHEMA_UNREACHABLE`, a
+  checagem de schema foi PULADA — não é sucesso. Siga o procedimento da
+  skill (SKILL.md § Validation result handling): apontar temporariamente
+  `$schema` pra última versão publicada, revalidar, corrigir, restaurar.
+
+Alvo: primeira página do relatório (crie se não houver).
+
+Layout (canvas 1920×1080, grid 8px, margem 32):
+- Card KPI:  x=32  y=32   w=360  h=200
+- Barras:    x=32  y=264  w=920  h=480 — horizontal se for ranking,
+  baseline zero sempre, ordenado descendente.
+
+Nomes legíveis: título do visual = pergunta analítica; eixos e labels com
+display names em linguagem natural, nunca nome técnico de coluna.
+
+═══ FASE 3 — FECHAMENTO ═══
+1. powerbi-report-author validate (1 vez). Warning de "htmlContent" é
+   ignorável; PBIR_SCHEMA_UNREACHABLE exige o procedimento da Fase 2 antes
+   de concluir.
+2. powerbi-desktop reload → screenshot da página.
+3. Confirme: "1 card KPI + 1 gráfico de barras criados, validados e
+   recarregados no Desktop."</pre>
   </div>
 </section>
 
