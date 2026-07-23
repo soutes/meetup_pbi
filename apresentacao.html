@@ -672,23 +672,38 @@
 <!-- ============ 14. ABERTURA AO VIVO ============ -->
 <section class="slide">
   <div class="kicker">parte 2 · demonstração</div>
-  <h1>Agora, <span class="accent">ao vivo</span></h1>
+  <h1>Agora, <span class="accent">ao vivo</span><span style="color: var(--faint);"> (só que não)</span></h1>
+  <p class="lead" style="margin-top: 2vh; max-width: 62ch;">Prometo tentar ao vivo — mas já gravei o prompt rodando antes, porque Wi-Fi de auditório é sempre uma aposta. Se a internet me abandonar no palco, a gente assiste ao vídeo e finge que era o plano B o tempo todo.</p>
 </section>
 
-<!-- ============ 15. AO VIVO — PROMPT 1 ============ -->
+<!-- ============ 14.5 PREPARAR O AMBIENTE ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · prompt 1 de 2 · descoberta e plano</div>
-  <h2>Um prompt, modelo inteiro mapeado</h2>
+  <div class="kicker">antes do prompt · preparar o ambiente</div>
+  <h2>Quatro passos antes de qualquer prompt</h2>
+  <ul class="check">
+    <li><span class="tick">1</span><div>Abrir o <span class="mono">Power BI Desktop</span></div></li>
+    <li><span class="tick">2</span><div>Obter dados → conectar a base &nbsp;<span class="why">é a fonte que vira o modelo semântico</span></div></li>
+    <li><span class="tick">3</span><div>Salvar como projeto <span class="mono accent">.pbip</span> &nbsp;<span class="why">Arquivo → Salvar como → Power BI Project</span></div></li>
+    <li><span class="tick">4</span><div>Fechar o Desktop &nbsp;<span class="why">obrigatório pro fluxo Bridge (TMDL direto); no fluxo MCP, reabra antes do prompt 1</span></div></li>
+  </ul>
+</section>
+
+<!-- ============ 15. AO VIVO — BRIDGE — PROMPT 1 ============ -->
+<section class="slide">
+  <div class="kicker">ao vivo · opção 1 · bridge (sem mcp) · prompt 1 de 2 · descoberta e plano</div>
+  <h2>Opção 1 — Bridge: modelo mapeado direto do TMDL</h2>
+  <p class="lead" style="margin-top: -1.6vh; margin-bottom: 1.8vh;">Sem MCP: leitura direta dos arquivos <span class="mono">.tmdl</span>. O Power BI Desktop fica <strong style="color: var(--text);">fechado desde este primeiro prompt</strong> — o Bridge só entra no fim, pra recarregar e tirar print.</p>
   <div class="promptbox">
     Invoque a skill <span class="skill">/semantic-model-authoring</span>, caminho TMDL direto — sem <span class="mono">powerbi-modeling-mcp</span> neste fluxo, Desktop <strong style="color: var(--text);">FECHADO</strong> (aberto, sobrescreve qualquer edição de TMDL em disco). Leia só arquivos de definição (.tmdl, .json) — nunca dado bruto. Liste tabelas, colunas, medidas e relacionamentos; resuma fato/dimensão e cardinalidade. Proponha 1 card KPI e 1 gráfico de barras, com as medidas necessárias (nome, DAX, formatString, displayFolder — ASCII, sem acento). Grave o plano em <span class="mono">_status/plano.md</span> e pare aí.
   </div>
   <div class="note"><span class="tag">formato</span><span>Denso e direto: a skill certa já invocada com <span class="mono">/skill</span>, contexto completo, zero ida-e-volta.</span></div>
 </section>
 
-<!-- ============ 16. AO VIVO — PROMPT 2 ============ -->
+<!-- ============ 16. AO VIVO — BRIDGE — PROMPT 2 ============ -->
 <section class="slide">
-  <div class="kicker">ao vivo · prompt 2 de 2 · medidas + visuais</div>
-  <h2>O prompt <span class="accent">completo</span><span class="mono accent" style="animation: blink 1.1s steps(1) infinite;">_</span></h2>
+  <div class="kicker">ao vivo · opção 1 · bridge (sem mcp) · prompt 2 de 2 · medidas + visuais</div>
+  <h2>Opção 1 — Bridge: medidas em TMDL, visuais em PBIR</h2>
+  <p class="lead" style="margin-top: -1.4vh; margin-bottom: 0.6vh;">Continuação do prompt 1 — Desktop continua <strong style="color: var(--text);">fechado até o fim</strong>. Só reabre depois de tudo salvo, pra conferir.</p>
   <div class="promptcols">
   <div class="promptbox promptfull">
     <pre>Você é engenheiro Power BI. Leia _status/plano.md (se não existir, pare e
@@ -741,6 +756,65 @@ Instrua o usuário: "Abra o .pbip no Power BI Desktop pra conferir."</pre>
     <span class="good">validate</span><span>→</span><span class="good">Desktop fechado até o fim</span><span>→</span><span class="good">abrir e conferir</span><span>→</span><span style="color: var(--text);">só então confirma</span>
   </div>
   <style>@keyframes blink { 50% { opacity: 0; } }</style>
+</section>
+
+<!-- ============ 16.5 AO VIVO — MCP — PROMPT 1 ============ -->
+<section class="slide">
+  <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 1 de 2 · conectar e analisar</div>
+  <h2>Opção 2 — MCP: conecta no Desktop aberto</h2>
+  <p class="lead" style="margin-top: -1.6vh; margin-bottom: 1.8vh;">Via <span class="mono">powerbi-modeling-mcp</span>: o Power BI Desktop precisa estar <strong style="color: var(--text);">aberto</strong>, com o .pbip já carregado — o agente fala direto com o modelo em memória.</p>
+  <div class="promptbox">
+    Invoque a skill <span class="skill">/semantic-model-authoring</span> via <span class="mono">powerbi-modeling-mcp</span> (TOM ao vivo — Desktop <strong style="color: var(--text);">ABERTO</strong> com o .pbip carregado). Use só <span class="mono">INFO.TABLES()</span>/<span class="mono">INFO.COLUMNS()</span>/<span class="mono">INFO.MEASURES()</span>/<span class="mono">INFO.RELATIONSHIPS()</span> — nunca <span class="mono">EVALUATE</span> sobre tabela ou coluna bruta. Liste tabelas, colunas, medidas e relacionamentos; resuma fato/dimensão e cardinalidade. Proponha 1 card KPI e 1 gráfico de barras, com as medidas necessárias (nome, DAX, formatString, displayFolder). Grave o plano em <span class="mono">_status/plano.md</span> e pare aí.
+  </div>
+  <div class="note"><span class="tag">formato</span><span>Mesmo formato do prompt 1 da opção Bridge — só troca a origem do dado: MCP ao vivo em vez de leitura de TMDL.</span></div>
+</section>
+
+<!-- ============ 16.6 AO VIVO — MCP — PROMPT 2 ============ -->
+<section class="slide">
+  <div class="kicker">ao vivo · opção 2 · mcp ao vivo · prompt 2 de 2 · medidas + visuais</div>
+  <h2>Opção 2 — MCP: medida validada na hora</h2>
+  <p class="lead" style="margin-top: -1.4vh; margin-bottom: 0.6vh;">Continuação do prompt 1 — Desktop <strong style="color: var(--text);">continua aberto</strong>. Medida valida na hora; no fim, o Bridge recarrega e tira o print sozinho.</p>
+  <div class="promptcols">
+  <div class="promptbox promptfull">
+    <pre>Continuação: plano já está em _status/plano.md. Desktop segue ABERTO.
+Execute até o fim, sem pedir confirmação.
+
+FASE 1 — MEDIDAS (skill /semantic-model-authoring, via powerbi-modeling-mcp)
+Liste as medidas existentes (INFO.MEASURES()). NÃO crie duplicata.
+Para cada medida do plano que ainda não existe:
+  measure_operations → Create
+    { tableName, name, expression, formatString, displayFolder }
+  dax_query_operations → EVALUATE ROW("t",[&lt;medida&gt;])
+  Erro → mostre o texto exato, corrija, revalide. Não avance com erro.
+Ao final de TODAS: database_operations → ExportToTmdlFolder
+(uma vez só, não por medida — grava o TMDL em UTF-8 correto).</pre>
+  </div>
+  <div class="promptbox promptfull">
+    <pre>FASE 2 — VISUAIS (skill /powerbi-report-authoring)
+Alvo: primeira página do relatório (crie se não houver).
+Card KPI: x=32 y=32 w=360 h=200. Barras: x=32 y=264 w=920 h=480 — baseline
+zero, ordenado descendente. Títulos = pergunta analítica; eixos e labels em
+linguagem natural, nunca nome técnico de coluna.
+
+Antes de escrever visual.json, leia authoring.md § Erros Comuns e
+formatting.md. Não repita:
+  - field sem wrapper Column/Measure/Aggregation (Desktop não abre o
+    relatório)
+  - objects.* como objeto solto — sempre array [{ "properties": {...} }]
+  - literal sem sufixo D/L ("14pt", "8" cru), cor como string crua
+  - filterConfig dentro de "visual" (mora na raiz, irmão de "visual")
+Gere cada literal com:
+  powerbi-report-author expr encode &lt;valor&gt; --kind &lt;bool|number|integer|string|color&gt;
+
+FECHAMENTO
+powerbi-report-author validate — 0 erros (PBIR_SCHEMA_UNREACHABLE = checagem
+pulada, não é sucesso). powerbi-desktop reload → screenshot da página.</pre>
+  </div>
+  </div>
+  <div class="note" style="margin-top: 1.2vh;"><span class="tag">código completo</span><span>Copie o prompt completo no arquivo <span class="mono">codes.md</span>.</span></div>
+  <div class="flow-line" style="margin-top: 1.4vh;">
+    <span class="good">validate</span><span>→</span><span class="good">reload</span><span>→</span><span class="good">screenshot</span><span>→</span><span style="color: var(--text);">só então confirma</span>
+  </div>
 </section>
 
 <!-- ============ 17. OBRIGADO ============ -->
